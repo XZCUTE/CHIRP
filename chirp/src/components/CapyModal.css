@@ -1,0 +1,123 @@
+.capy-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.capy-modal-overlay.open {
+  opacity: 1;
+}
+
+.capy-modal-overlay.closing {
+  opacity: 0;
+}
+
+.capy-modal-content {
+  background: #1e1e1e; /* Dark theme bg */
+  border: 1px solid var(--capy-border, rgba(255, 255, 255, 0.1));
+  border-radius: 24px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  transform: scale(0.8) translateY(20px);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Liquid/Elastic effect */
+}
+
+.capy-modal-content.open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.capy-modal-content.closing {
+  transform: scale(0.9) translateY(10px);
+  opacity: 0;
+  transition: all 0.3s ease-in;
+}
+
+.capy-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.capy-modal-icon {
+  font-size: 28px;
+}
+
+.capy-modal-title {
+  margin: 0;
+  font-size: 20px;
+  color: var(--capy-text, #fff);
+  font-weight: 700;
+}
+
+.capy-modal-body {
+  margin-bottom: 24px;
+}
+
+.capy-modal-body p {
+  color: var(--capy-text-secondary, #ccc);
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.capy-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.capy-modal-btn {
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, filter 0.2s;
+  font-size: 14px;
+}
+
+.capy-modal-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.capy-modal-btn:active {
+  transform: translateY(0);
+}
+
+.capy-modal-btn.primary {
+  background: var(--capy-accent, #d2691e);
+  color: white;
+  width: 100%;
+}
+
+.capy-modal-btn.confirm {
+  background: var(--capy-success, #798b63);
+  color: white;
+}
+
+.capy-modal-btn.cancel {
+  background: transparent;
+  border: 1px solid var(--capy-border, rgba(255, 255, 255, 0.1));
+  color: var(--capy-text-secondary, #ccc);
+}
+
+.capy-modal-btn.cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--capy-text, #fff);
+}
