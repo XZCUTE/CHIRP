@@ -1,0 +1,474 @@
+.cappies-page-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.cappies-sidebar {
+  width: 280px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid var(--capy-border);
+  padding-top: 20px;
+  background-color: var(--capy-bg); /* Ensure matches body bg */
+  z-index: 100;
+}
+
+.cappies-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.cappies-container {
+  flex: 1;
+  margin-left: 280px;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.cappies-header, .cappies-content {
+  width: 100%;
+  max-width: 1200px;
+  align-self: center;
+}
+
+/* Sidebar Styles (copied from CapyHome for consistency) */
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--capy-text);
+}
+
+.sidebar-item:hover {
+  background: var(--capy-hover);
+}
+
+.sidebar-item.active {
+  font-weight: 700;
+  color: var(--capy-accent);
+}
+
+.sidebar-icon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.cappies-header {
+  margin-bottom: 20px;
+}
+
+.cappies-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--capy-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cappies-tabs {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+  border-bottom: 1px solid var(--capy-border);
+  padding-bottom: 2px;
+}
+
+.cappies-tab {
+  background: none;
+  border: none;
+  color: var(--capy-text-secondary);
+  font-size: 16px;
+  font-weight: 600;
+  padding: 10px 20px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.cappies-tab:hover {
+  color: var(--capy-text);
+}
+
+.cappies-tab.active {
+  color: var(--capy-accent);
+}
+
+.cappies-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--capy-accent);
+  border-radius: 3px 3px 0 0;
+}
+
+.cappies-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chat Layout (Messenger Style) */
+.cappies-chat-container {
+  display: flex;
+  height: calc(100vh - 200px); /* Adjust based on header/nav */
+  background: var(--capy-card-bg);
+  border: 1px solid var(--capy-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.chat-sidebar {
+  width: 320px;
+  background: rgba(0, 0, 0, 0.2);
+  border-right: 1px solid var(--capy-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--capy-border);
+  font-weight: 600;
+  color: var(--capy-text);
+}
+
+.chat-friends-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chat-friend-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.chat-friend-item:hover {
+  background: var(--capy-hover);
+}
+
+.chat-friend-item.active {
+  background: rgba(210, 105, 30, 0.1);
+  border-left: 3px solid var(--capy-accent);
+}
+
+.chat-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.chat-friend-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-friend-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--capy-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-friend-status {
+  font-size: 12px;
+  color: var(--capy-text-secondary);
+}
+
+/* Chat Main Area */
+.chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.chat-window-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--capy-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.chat-header-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.chat-header-name {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+  position: relative;
+  word-wrap: break-word;
+}
+
+.message-bubble.sent {
+  align-self: flex-end;
+  background: var(--capy-accent);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message-bubble.received {
+  align-self: flex-start;
+  background: #3a3b3c;
+  color: var(--capy-text);
+  border-bottom-left-radius: 4px;
+}
+
+.message-time {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-top: 4px;
+  display: block;
+  text-align: right;
+}
+
+.chat-input-area {
+  padding: 16px;
+  border-top: 1px solid var(--capy-border);
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.chat-input {
+  flex: 1;
+  background: #3a3b3c;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 16px;
+  color: white;
+  font-size: 14px;
+  resize: none;
+  min-height: 40px;
+  max-height: 100px;
+  font-family: inherit;
+}
+
+.chat-input:focus {
+  outline: none;
+  background: #4a4b4c;
+}
+
+.chat-send-btn {
+  background: var(--capy-accent);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chat-send-btn:hover {
+  background: #b05515;
+}
+
+.chat-send-btn:disabled {
+  background: #555;
+  cursor: not-allowed;
+}
+
+.empty-chat-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--capy-text-secondary);
+  text-align: center;
+}
+
+.empty-chat-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* Existing Grids (for Requests/Find) */
+.cappies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.capy-user-card {
+  background: var(--capy-card-bg);
+  border: 1px solid var(--capy-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.capy-user-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--capy-accent);
+}
+
+.capy-user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+  border: 2px solid var(--capy-accent);
+}
+
+.capy-user-name {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--capy-text);
+}
+
+.capy-user-role {
+  font-size: 12px;
+  color: var(--capy-text-secondary);
+  margin-bottom: 16px;
+}
+
+.capy-user-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.capy-user-actions button {
+  flex: 1;
+  padding: 8px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+.capy-btn-primary {
+  background: var(--capy-accent);
+  color: white;
+  border: none;
+}
+
+.capy-btn-primary:hover {
+  background: #b05515;
+}
+
+.capy-btn-secondary {
+  background: transparent;
+  border: 1px solid var(--capy-border);
+  color: var(--capy-text-secondary);
+}
+
+.capy-btn-secondary:hover {
+  border-color: var(--capy-text);
+  color: var(--capy-text);
+}
+
+/* Search Box */
+.cappies-search-box {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  max-width: 600px;
+}
+
+.cappies-search-input {
+  flex: 1;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--capy-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--capy-text);
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.cappies-search-input:focus {
+  border-color: var(--capy-accent);
+  box-shadow: 0 0 0 2px rgba(210, 105, 30, 0.2);
+}
+
+.cappies-search-btn {
+  background-color: var(--capy-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cappies-search-btn:hover {
+  background-color: #b05515;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--capy-text-secondary);
+}
+
+.empty-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 16px;
+}

@@ -1,0 +1,127 @@
+.capy-devs-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: calc(100vh - var(--nav-height));
+}
+
+.devs-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 40px 0;
+  background: radial-gradient(circle at center, rgba(139, 69, 19, 0.2), transparent 70%);
+}
+
+.devs-title {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--capy-text);
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.devs-subtitle {
+  color: var(--capy-text-secondary);
+  font-size: 18px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.dev-badge {
+  background-color: var(--capy-accent);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* Admin Post Form */
+.admin-post-form {
+  background: var(--capy-card-bg);
+  border: 1px solid var(--capy-accent);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 40px;
+}
+
+.admin-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--capy-border);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--capy-text);
+  margin-bottom: 12px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.admin-input:focus {
+  border-color: var(--capy-accent);
+  outline: none;
+}
+
+.admin-submit-btn {
+  background: var(--capy-accent);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  float: right;
+}
+
+/* Dev Post Card */
+.dev-post-card {
+  background: var(--capy-card-bg);
+  border-left: 4px solid var(--capy-accent);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dev-post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.dev-post-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--capy-text);
+  margin: 0;
+}
+
+.dev-post-meta {
+  font-size: 14px;
+  color: var(--capy-text-secondary);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.dev-post-content {
+  color: var(--capy-text);
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.dev-post-tag {
+  display: inline-block;
+  background: rgba(210, 105, 30, 0.15);
+  color: var(--capy-accent);
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 16px;
+}
