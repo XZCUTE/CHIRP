@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getDatabase, ref, get } from 'firebase/database';
@@ -11,6 +11,7 @@ import LandingPage from './pages/LandingPage';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
+import PhotoViewer from './pages/PhotoViewer';
 import './App.css';
 
 // Component to handle Auth redirects and state
@@ -89,11 +90,31 @@ const AuthGuard = ({ children }) => {
 // Layout component to conditionally render Navbar
 const Layout = ({ children }) => {
   const location = useLocation();
+  const prevPathRef = useRef(location.pathname);
 
-  // Scroll to top on route change
+  // Scroll to top on base route changes (ignore modal overlays)
   useEffect(() => {
+    const isPhotoRoute = location.pathname.startsWith('/photo/');
+    const hasBackground = !!location.state?.backgroundLocation;
+    const prevPath = prevPathRef.current;
+    prevPathRef.current = location.pathname;
+
+    if (isPhotoRoute || hasBackground) return;
+
+    const cameFromPhoto = prevPath.startsWith('/photo/');
+    if (cameFromPhoto) {
+      const key = 'scroll:' + location.pathname;
+      const stored = sessionStorage.getItem(key);
+      if (stored) {
+        window.scrollTo(0, Number(stored));
+        // optional cleanup
+        // sessionStorage.removeItem(key);
+        return;
+      }
+    }
+
     window.scrollTo(0, 0);
-  }, [location.pathname]);
+  }, [location.pathname, location.state]);
 
   // Hide Navbar on Landing Page, Signup Page, and Forgot Password Page
   const hideNavbar = location.pathname === '/' || location.pathname === '/signup' || location.pathname === '/forgot-password' || location.pathname === '/connections';
@@ -113,20 +134,38 @@ function App() {
     <Router>
       <AuthGuard>
         <Layout>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/home" element={<CapyHome />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/connections" element={<Cappies />} />
-            <Route path="/devs" element={<CapyDEVS />} />
-            {/* Fallback to Landing Page */}
-            <Route path="*" element={<LandingPage />} />
-          </Routes>
+          <ModalSwitch />
         </Layout>
       </AuthGuard>
     </Router>
+  );
+}
+
+function ModalSwitch() {
+  const location = useLocation();
+  const state = location.state;
+  const backgroundLocation = state && state.backgroundLocation;
+
+  return (
+    <>
+      <Routes location={backgroundLocation || location}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/home" element={<CapyHome />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/connections" element={<Cappies />} />
+        <Route path="/devs" element={<CapyDEVS />} />
+        <Route path="/photo/:postId/:index" element={<PhotoViewer />} />
+        <Route path="*" element={<LandingPage />} />
+      </Routes>
+
+      {backgroundLocation && (
+        <Routes>
+          <Route path="/photo/:postId/:index" element={<PhotoViewer />} />
+        </Routes>
+      )}
+    </>
   );
 }
 

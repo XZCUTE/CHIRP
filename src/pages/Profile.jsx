@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getDatabase, ref, onValue, update, remove, query, orderByChild, equalTo, push, runTransaction, serverTimestamp } from 'firebase/database';
 import { updateProfile } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -10,6 +11,8 @@ import { uploadToImgBB, deleteFromImgBB } from '../utils/imgbb';
 import { extractColor } from '../utils/colorUtils';
 
 const Profile = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [allPosts, setAllPosts] = useState([]);
@@ -215,7 +218,7 @@ const Profile = () => {
     // Extract color for theme
     try {
       const color = await extractColor(previewUrl);
-      setThemeColor(color);
+      if (color) setThemeColor(color);
     } catch (err) {
       console.error("Failed to extract color", err);
     }
@@ -306,6 +309,9 @@ const Profile = () => {
       setSelectedAvatar(null);
       setAvatarPreview(null);
       setIsAvatarRemoved(false);
+      setSelectedCover(null);
+      setCoverPreview(null);
+      setIsCoverRemoved(false);
     } catch (error) {
       console.error("Error updating profile:", error);
       showModal({ message: "Failed to update profile.", title: "Error" });
@@ -611,6 +617,20 @@ const Profile = () => {
     });
   };
 
+  if (!user || !profileData) {
+    return (
+      <div style={{ 
+        height: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        color: 'var(--capy-text-secondary)' 
+      }}>
+        Loading profile...
+      </div>
+    );
+  }
+
   const displayedPosts = getDisplayedPosts();
 
   const displayCoverUrl = coverPreview || (!isCoverRemoved && profileData.coverPhotoURL);
@@ -627,8 +647,14 @@ const Profile = () => {
         <div 
             className="profile-cover" 
             style={{ 
-                backgroundImage: displayCoverUrl ? `url(${displayCoverUrl})` : 'none',
-                background: !displayCoverUrl ? (themeColor || 'linear-gradient(45deg, var(--capy-primary-dark), #2a1a0f)') : undefined,
+                backgroundImage: displayCoverUrl 
+                  ? `url(${displayCoverUrl})` 
+                  : (themeColor || profileData.themeColor 
+                      ? 'none' 
+                      : 'linear-gradient(45deg, var(--capy-primary-dark), #2a1a0f)'),
+                backgroundColor: !displayCoverUrl && (themeColor || profileData.themeColor) 
+                  ? (themeColor || profileData.themeColor) 
+                  : undefined,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
             }}
@@ -1071,7 +1097,16 @@ const Profile = () => {
                 
                 {post.image && (
                   <div className="post-image-container">
-                    <img src={post.image} alt="Post content" className="post-image" />
+                    <img 
+                      src={post.image} 
+                      alt="Post content" 
+                      className="post-image" 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        navigate(`/photo/${post.id}/0`, { state: { backgroundLocation: location, scrollY: window.scrollY } });
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    />
                   </div>
                 )}
                 

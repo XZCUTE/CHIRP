@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getDatabase, ref, onValue, push, update, remove, serverTimestamp, runTransaction } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 import './CapyHome.css';
@@ -10,6 +10,7 @@ import { uploadToImgBB, deleteFromImgBB } from '../utils/imgbb';
 
 const CapyHome = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [posts, setPosts] = useState([]);
   const [news, setNews] = useState([]);
   const [newsIds, setNewsIds] = useState([]);
@@ -20,11 +21,6 @@ const CapyHome = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  
-  // Image Viewer State
-  const [viewerImages, setViewerImages] = useState([]);
-  const [viewerIndex, setViewerIndex] = useState(0);
-  const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('CapyHome');
   const [loadingNews, setLoadingNews] = useState(true);
   const [selectedTrend, setSelectedTrend] = useState(null);
@@ -36,6 +32,23 @@ const CapyHome = () => {
   
   // Saved Posts State
   const [savedPosts, setSavedPosts] = useState({});
+
+  // Lightbox State
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxPost, setLightboxPost] = useState(null);
+
+  const openLightbox = (images, index, post) => {
+    // Normalize images to array of objects with url
+    const normalizedImages = images.map(img => 
+      typeof img === 'string' ? { url: img } : img
+    );
+    setLightboxImages(normalizedImages);
+    setLightboxIndex(index);
+    setLightboxPost(post);
+    setLightboxOpen(true);
+  };
 
   // Force update on profile change
   const [, forceUpdate] = useState();
@@ -313,7 +326,7 @@ const CapyHome = () => {
     fetchAndFilterNews();
   }, [newsIds, newsLimit, news.length]); // Depend on news.length to trigger next batch if needed
 
-  // Fetch Posts and Calculate Trends
+  // Fetch Posts
   useEffect(() => {
     const postsRef = ref(db, 'posts');
     const unsubscribe = onValue(postsRef, (snapshot) => {
@@ -323,9 +336,8 @@ const CapyHome = () => {
           id: key,
           ...data[key]
         })).sort((a, b) => b.timestamp - a.timestamp);
-        
+
         setPosts(postsArray);
-        calculateTrends(postsArray);
       } else {
         setPosts([]);
         setTrends([]);
@@ -378,11 +390,59 @@ const CapyHome = () => {
     return () => unsubscribe();
   }, [activeCommentPostId, db]);
 
+  useEffect(() => {
+    if (posts.length === 0) {
+      setTrends([]);
+      return;
+    }
+    calculateTrends(posts);
+  }, [posts, trendTimeframe]);
+
   const calculateTrends = (currentPosts) => {
+    const now = new Date();
+    let start;
+
+    if (trendTimeframe === 'daily') {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    } else if (trendTimeframe === 'weekly') {
+      const day = now.getDay();
+      const diffToMonday = (day + 6) % 7;
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+    } else if (trendTimeframe === 'monthly') {
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (trendTimeframe === 'yearly') {
+      start = new Date(now.getFullYear(), 0, 1);
+    }
+
+    let filteredPosts = currentPosts;
+
+    if (start) {
+      const startMs = start.getTime();
+      filteredPosts = currentPosts.filter(post => {
+        if (!post.timestamp) return false;
+
+        let postTime;
+
+        if (typeof post.timestamp === 'number') {
+          postTime = post.timestamp;
+        } else if (typeof post.timestamp === 'string') {
+          const parsed = Date.parse(post.timestamp);
+          if (Number.isNaN(parsed)) return false;
+          postTime = parsed;
+        } else if (post.timestamp && typeof post.timestamp.toMillis === 'function') {
+          postTime = post.timestamp.toMillis();
+        } else {
+          return false;
+        }
+
+        return postTime >= startMs;
+      });
+    }
+
     const hashtagCounts = {};
     let totalHashtagsFound = 0;
 
-    currentPosts.forEach(post => {
+    filteredPosts.forEach(post => {
       if (post.content) {
         const found = post.content.match(/#[a-zA-Z0-9_]+/g);
         if (found) {
@@ -588,55 +648,6 @@ const CapyHome = () => {
       }
     }
   };
-
-  // Image Viewer Handlers
-  const openImageViewer = (images, index = 0) => {
-    // Normalize images to array of strings (urls) or objects with url property
-    const normalizedImages = images.map(img => typeof img === 'string' ? { url: img } : img);
-    setViewerImages(normalizedImages);
-    setViewerIndex(index);
-    setIsViewerOpen(true);
-    document.body.style.overflow = 'hidden'; // Prevent scrolling
-  };
-
-  const closeImageViewer = () => {
-    setIsViewerOpen(false);
-    setViewerImages([]);
-    setViewerIndex(0);
-    document.body.style.overflow = 'auto'; // Restore scrolling
-  };
-
-  const nextImage = (e) => {
-    if (e) e.stopPropagation();
-    if (viewerIndex < viewerImages.length - 1) {
-      setViewerIndex(prev => prev + 1);
-    }
-  };
-
-  const prevImage = (e) => {
-    if (e) e.stopPropagation();
-    if (viewerIndex > 0) {
-      setViewerIndex(prev => prev - 1);
-    }
-  };
-
-  // Keyboard navigation for image viewer
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (!isViewerOpen) return;
-      
-      if (e.key === 'Escape') {
-        closeImageViewer();
-      } else if (e.key === 'ArrowRight') {
-        nextImage();
-      } else if (e.key === 'ArrowLeft') {
-        prevImage();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isViewerOpen, viewerIndex, viewerImages.length]);
 
   const handlePostSubmit = async () => {
     if (!newPostContent.trim() && selectedImages.length === 0) return;
@@ -978,14 +989,13 @@ const CapyHome = () => {
 
           {/* Image Preview Area */}
           {imagePreviews.length > 0 && (
-            <div className="image-preview-area" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px' }}>
+            <div className="image-preview-grid">
               {imagePreviews.map((preview, index) => (
-                <div key={index} className="image-preview-item" style={{ position: 'relative', flexShrink: 0 }}>
+                <div key={index} className="image-preview-item">
                   <img src={preview} alt={`Preview ${index}`} className="image-preview-img" />
                   <button 
                     className="remove-image-btn" 
                     onClick={() => removeSelectedImage(index)}
-                    style={{ position: 'absolute', top: '5px', right: '5px' }}
                   >×</button>
                 </div>
               ))}
@@ -1283,33 +1293,10 @@ const CapyHome = () => {
                               </div>
                            )}
                            {(post.repostData.images || post.repostData.image) && (
-                              <div className="post-image-container-mini"
-                                   style={post.repostData.images && post.repostData.images.length > 1 ? { 
-                                     display: 'grid', 
-                                     gridTemplateColumns: 'repeat(2, 1fr)',
-                                     gap: '2px' 
-                                   } : {}}>
-                                {post.repostData.images ? (
-                                  post.repostData.images.map((img, idx) => (
-                                    <img 
-                                      key={idx} 
-                                      src={img.url} 
-                                      alt={`Repost content ${idx}`} 
-                                      className="post-image" 
-                                      style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '4px', cursor: 'pointer' }}
-                                      onClick={(e) => { e.stopPropagation(); openImageViewer(post.repostData.images, idx); }}
-                                    />
-                                  ))
-                                ) : (
-                                  <img 
-                                    src={post.repostData.image} 
-                                    alt="Repost content" 
-                                    className="post-image" 
-                                    style={{ cursor: 'pointer' }}
-                                    onClick={(e) => { e.stopPropagation(); openImageViewer([post.repostData.image], 0); }}
-                                  />
-                                )}
-                              </div>
+                              <PostImagesGrid 
+                                images={post.repostData.images || (post.repostData.image ? [{url: post.repostData.image}] : [])} 
+                                onImageClick={(idx) => navigate(`/photo/${post.id}/${idx}`, { state: { backgroundLocation: location, scrollY: window.scrollY } })}
+                              />
                            )}
                         </div>
                       </div>
@@ -1349,40 +1336,11 @@ const CapyHome = () => {
               </div>
               
               {(post.images || post.image) && (
-                 <div className={`post-image-container ${post.images && post.images.length > 1 ? 'multi-image-grid' : ''}`} 
-                      style={post.images && post.images.length > 1 ? { 
-                        display: 'grid', 
-                        gridTemplateColumns: post.images.length === 1 ? '1fr' : 'repeat(2, 1fr)',
-                        gap: '4px' 
-                      } : {}}>
-                   {post.images ? (
-                     post.images.map((img, idx) => (
-                        <img 
-                          key={idx} 
-                          src={img.url} 
-                          alt={`Post content ${idx}`} 
-                          className="post-image" 
-                          style={{ 
-                            width: '100%', 
-                            height: '200px', 
-                            objectFit: 'cover',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                          }} 
-                          onClick={() => openImageViewer(post.images, idx)}
-                        />
-                     ))
-                   ) : (
-                     <img 
-                       src={post.image} 
-                       alt="Post content" 
-                       className="post-image" 
-                       style={{ cursor: 'pointer' }}
-                       onClick={() => openImageViewer([post.image], 0)}
-                     />
-                   )}
-                 </div>
-               )}
+                <PostImagesGrid 
+                  images={post.images || (post.image ? [{url: post.image}] : [])} 
+                  onImageClick={(idx) => navigate(`/photo/${post.id}/${idx}`, { state: { backgroundLocation: location, scrollY: window.scrollY } })}
+                />
+              )}
               
               <div className="post-actions">
                 <button 
@@ -1668,36 +1626,413 @@ const CapyHome = () => {
         <span>+</span>
       </button>
 
-      {/* Image Viewer Overlay */}
-      {isViewerOpen && (
-        <div className="image-viewer-overlay" onClick={closeImageViewer}>
-          <button className="viewer-close-btn" onClick={closeImageViewer}>×</button>
-          
-          <div className="viewer-content" onClick={(e) => e.stopPropagation()}>
-            {viewerIndex > 0 && (
-              <button className="viewer-nav-btn prev" onClick={prevImage}>‹</button>
-            )}
-            
-            <img 
-              src={viewerImages[viewerIndex]?.url} 
-              alt={`View ${viewerIndex + 1}`} 
-              className="viewer-image" 
-            />
-            
-            {viewerIndex < viewerImages.length - 1 && (
-              <button className="viewer-nav-btn next" onClick={nextImage}>›</button>
-            )}
-            
-            {viewerImages.length > 1 && (
-               <div className="viewer-counter">
-                 {viewerIndex + 1} / {viewerImages.length}
-               </div>
-            )}
-          </div>
-        </div>
-      )}
-
       <CapyModal {...modalConfig} onClose={closeModal} />
+      
+      {lightboxOpen && (
+        <ImageViewer 
+          images={lightboxImages} 
+          initialIndex={lightboxIndex} 
+          onClose={() => setLightboxOpen(false)} 
+          post={lightboxPost}
+          comments={lightboxPost ? (commentsData[lightboxPost.id] || []) : []}
+          user={user}
+        />
+      )}
+    </div>
+  );
+};
+
+const PostImagesGrid = ({ images, onImageClick }) => {
+  if (!images || images.length === 0) return null;
+  const count = images.length;
+
+  // Single Image
+  if (count === 1) {
+    return (
+      <div className="post-image-container single-image">
+        <img 
+          src={images[0].url} 
+          alt="Post content" 
+          className="post-image" 
+          onClick={(e) => { e.stopPropagation(); onImageClick(0); }}
+          style={{ 
+            cursor: 'pointer', 
+            width: '100%', 
+            height: 'auto', 
+            maxHeight: '600px', 
+            objectFit: 'contain',
+            backgroundColor: 'rgba(0,0,0,0.02)',
+            borderRadius: '8px'
+          }}
+        />
+      </div>
+    );
+  }
+
+  // 2 Images
+  if (count === 2) {
+    return (
+      <div className="post-image-container multi-image-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px', height: '300px', overflow: 'hidden', borderRadius: '8px' }}>
+        {images.map((img, idx) => (
+          <img 
+            key={idx}
+            src={img.url}
+            alt={`Post content ${idx}`}
+            className="post-image"
+            onClick={(e) => { e.stopPropagation(); onImageClick(idx); }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // 3 Images (1 Left, 2 Right)
+  if (count === 3) {
+    return (
+      <div className="post-image-container multi-image-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px', height: '300px', overflow: 'hidden', borderRadius: '8px' }}>
+        <div style={{ position: 'relative', height: '100%' }}>
+            <img 
+              src={images[0].url}
+              alt="Post content 0"
+              className="post-image"
+              onClick={(e) => { e.stopPropagation(); onImageClick(0); }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+            />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', height: '100%' }}>
+            <img 
+              src={images[1].url}
+              alt="Post content 1"
+              className="post-image"
+              onClick={(e) => { e.stopPropagation(); onImageClick(1); }}
+              style={{ width: '100%', height: '50%', objectFit: 'cover', cursor: 'pointer' }}
+            />
+            <img 
+              src={images[2].url}
+              alt="Post content 2"
+              className="post-image"
+              onClick={(e) => { e.stopPropagation(); onImageClick(2); }}
+              style={{ width: '100%', height: '50%', objectFit: 'cover', cursor: 'pointer' }}
+            />
+        </div>
+      </div>
+    );
+  }
+  
+  // 4 Images (Grid)
+  if (count === 4) {
+     return (
+      <div className="post-image-container multi-image-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '2px', height: '400px', overflow: 'hidden', borderRadius: '8px' }}>
+        {images.map((img, idx) => (
+          <img 
+            key={idx}
+            src={img.url}
+            alt={`Post content ${idx}`}
+            className="post-image"
+            onClick={(e) => { e.stopPropagation(); onImageClick(idx); }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // 5+ Images (2 Top, 3 Bottom)
+  return (
+      <div className="post-image-container multi-image-grid" style={{ display: 'flex', flexDirection: 'column', gap: '2px', borderRadius: '8px', overflow: 'hidden' }}>
+        {/* Top Row: 2 images */}
+        <div style={{ display: 'flex', gap: '2px', height: '250px' }}>
+             <img 
+              src={images[0].url}
+              alt="Post content 0"
+              className="post-image"
+              onClick={(e) => { e.stopPropagation(); onImageClick(0); }}
+              style={{ width: '50%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+            />
+             <img 
+              src={images[1].url}
+              alt="Post content 1"
+              className="post-image"
+              onClick={(e) => { e.stopPropagation(); onImageClick(1); }}
+              style={{ width: '50%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+            />
+        </div>
+        {/* Bottom Row: 3 images */}
+        <div style={{ display: 'flex', gap: '2px', height: '166px' }}>
+             <img 
+              src={images[2].url}
+              alt="Post content 2"
+              className="post-image"
+              onClick={(e) => { e.stopPropagation(); onImageClick(2); }}
+              style={{ width: '33.33%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+            />
+             <img 
+              src={images[3].url}
+              alt="Post content 3"
+              className="post-image"
+              onClick={(e) => { e.stopPropagation(); onImageClick(3); }}
+              style={{ width: '33.33%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+            />
+            <div style={{ position: 'relative', width: '33.33%', height: '100%', cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); onImageClick(4); }}>
+                 <img 
+                  src={images[4].url}
+                  alt="Post content 4"
+                  className="post-image"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                {count > 5 && (
+                    <div style={{ 
+                        position: 'absolute', 
+                        top: 0, 
+                        left: 0, 
+                        right: 0, 
+                        bottom: 0, 
+                        backgroundColor: 'rgba(0,0,0,0.5)', 
+                        color: 'white', 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        fontSize: '28px', 
+                        fontWeight: 'bold' 
+                    }}>
+                        +{count - 5}
+                    </div>
+                )}
+            </div>
+        </div>
+      </div>
+  );
+};
+
+const ImageViewer = ({ images, initialIndex, onClose, post, comments = [], user }) => {
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+
+  const getRelativeTime = (timestamp) => {
+    if (!timestamp) return 'Just now';
+    const date = timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date(timestamp);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d`;
+    return date.toLocaleDateString();
+  };
+
+  // Scroll Lock
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowLeft') setCurrentIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
+      if (e.key === 'ArrowRight') setCurrentIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [images.length, onClose]);
+
+  const handlePrev = (e) => {
+    e.stopPropagation();
+    setCurrentIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
+  };
+
+  const handleNext = (e) => {
+    e.stopPropagation();
+    setCurrentIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
+  };
+
+  return (
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        zIndex: 10000,
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'stretch',
+        justifyContent: 'flex-start',
+      }}
+      onClick={onClose}
+    >
+      {/* Image Stage */}
+      <div style={{ 
+        flex: 1, 
+        position: 'relative', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        backgroundColor: '#000',
+        minWidth: '0' // Fix flexbox overflow issue
+      }}>
+        <button 
+            onClick={onClose}
+            style={{
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: 'none',
+            color: 'white',
+            fontSize: '30px',
+            cursor: 'pointer',
+            borderRadius: '50%',
+            width: '45px',
+            height: '45px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 20,
+            transition: 'background 0.2s'
+            }}
+            onMouseOver={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
+            onMouseOut={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+        >
+            ×
+        </button>
+
+        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => e.stopPropagation()}>
+            {images.length > 1 && (
+            <button 
+                onClick={handlePrev}
+                style={{
+                position: 'absolute',
+                left: '20px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: 'none',
+                color: 'white',
+                fontSize: '40px',
+                cursor: 'pointer',
+                borderRadius: '50%',
+                width: '60px',
+                height: '60px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10
+                }}
+            >
+                ‹
+            </button>
+            )}
+
+            <img 
+            src={images[currentIndex].url} 
+            alt={`Full view ${currentIndex}`}
+            style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain',
+                boxShadow: '0 0 20px rgba(0,0,0,0.5)'
+            }}
+            />
+
+            {images.length > 1 && (
+            <button 
+                onClick={handleNext}
+                style={{
+                position: 'absolute',
+                right: '20px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: 'none',
+                color: 'white',
+                fontSize: '40px',
+                cursor: 'pointer',
+                borderRadius: '50%',
+                width: '60px',
+                height: '60px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10
+                }}
+            >
+                ›
+            </button>
+            )}
+        </div>
+      </div>
+
+      {/* Sidebar Info */}
+      {post && (
+          <div 
+            style={{
+                width: '360px',
+                maxWidth: '100vw',
+                backgroundColor: 'var(--capy-card-bg)',
+                borderLeft: '1px solid var(--capy-border)',
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                overflowY: 'auto',
+                flexShrink: 0
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+              {/* Header */}
+              <div style={{ padding: '16px', borderBottom: '1px solid var(--capy-border)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {(post.avatar && !post.avatar.includes('dicebear')) ? (
+                    <img src={post.avatar} alt={post.author} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    <InitialsAvatar name={post.author} uid={post.authorId} size={40} />
+                  )}
+                  <div>
+                      <h4 style={{ margin: 0, fontSize: '15px', color: 'var(--capy-text)' }}>{post.author}</h4>
+                      <span style={{ fontSize: '12px', color: 'var(--capy-text-secondary)' }}>
+                        {getRelativeTime(post.timestamp)}
+                      </span>
+                  </div>
+              </div>
+
+              {/* Content */}
+              <div style={{ padding: '16px', color: 'var(--capy-text)', fontSize: '14px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                {post.content}
+              </div>
+
+              {/* Stats */}
+              <div style={{ padding: '0 16px 12px', borderBottom: '1px solid var(--capy-border)', display: 'flex', justifyContent: 'space-between', color: 'var(--capy-text-secondary)', fontSize: '13px' }}>
+                <span>{post.likes || 0} Likes</span>
+                <span>{comments.length} Comments</span>
+              </div>
+
+              {/* Comments */}
+              <div style={{ flex: 1, padding: '16px', overflowY: 'auto' }}>
+                {comments.length > 0 ? (
+                    comments.map(comment => (
+                        <div key={comment.id} style={{ marginBottom: '16px', display: 'flex', gap: '10px' }}>
+                             {(comment.avatar && !comment.avatar.includes('dicebear')) ? (
+                                <img src={comment.avatar} alt={comment.author} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                            ) : (
+                                <InitialsAvatar name={comment.author} uid={comment.authorId} size={32} fontSize="12px" />
+                            )}
+                            <div>
+                                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '8px 12px', borderRadius: '18px', display: 'inline-block' }}>
+                                    <h5 style={{ margin: '0 0 4px', fontSize: '13px', color: 'var(--capy-text)' }}>{comment.author}</h5>
+                                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--capy-text)' }}>{comment.text}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div style={{ textAlign: 'center', color: 'var(--capy-text-secondary)', marginTop: '20px' }}>
+                        No comments yet.
+                    </div>
+                )}
+              </div>
+          </div>
+      )}
     </div>
   );
 };
