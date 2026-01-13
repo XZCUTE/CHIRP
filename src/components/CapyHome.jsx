@@ -20,6 +20,11 @@ const CapyHome = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Image Viewer State
+  const [viewerImages, setViewerImages] = useState([]);
+  const [viewerIndex, setViewerIndex] = useState(0);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('CapyHome');
   const [loadingNews, setLoadingNews] = useState(true);
   const [selectedTrend, setSelectedTrend] = useState(null);
@@ -583,6 +588,55 @@ const CapyHome = () => {
       }
     }
   };
+
+  // Image Viewer Handlers
+  const openImageViewer = (images, index = 0) => {
+    // Normalize images to array of strings (urls) or objects with url property
+    const normalizedImages = images.map(img => typeof img === 'string' ? { url: img } : img);
+    setViewerImages(normalizedImages);
+    setViewerIndex(index);
+    setIsViewerOpen(true);
+    document.body.style.overflow = 'hidden'; // Prevent scrolling
+  };
+
+  const closeImageViewer = () => {
+    setIsViewerOpen(false);
+    setViewerImages([]);
+    setViewerIndex(0);
+    document.body.style.overflow = 'auto'; // Restore scrolling
+  };
+
+  const nextImage = (e) => {
+    if (e) e.stopPropagation();
+    if (viewerIndex < viewerImages.length - 1) {
+      setViewerIndex(prev => prev + 1);
+    }
+  };
+
+  const prevImage = (e) => {
+    if (e) e.stopPropagation();
+    if (viewerIndex > 0) {
+      setViewerIndex(prev => prev - 1);
+    }
+  };
+
+  // Keyboard navigation for image viewer
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isViewerOpen) return;
+      
+      if (e.key === 'Escape') {
+        closeImageViewer();
+      } else if (e.key === 'ArrowRight') {
+        nextImage();
+      } else if (e.key === 'ArrowLeft') {
+        prevImage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isViewerOpen, viewerIndex, viewerImages.length]);
 
   const handlePostSubmit = async () => {
     if (!newPostContent.trim() && selectedImages.length === 0) return;
@@ -1242,11 +1296,18 @@ const CapyHome = () => {
                                       src={img.url} 
                                       alt={`Repost content ${idx}`} 
                                       className="post-image" 
-                                      style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '4px' }}
+                                      style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '4px', cursor: 'pointer' }}
+                                      onClick={(e) => { e.stopPropagation(); openImageViewer(post.repostData.images, idx); }}
                                     />
                                   ))
                                 ) : (
-                                  <img src={post.repostData.image} alt="Repost content" className="post-image" />
+                                  <img 
+                                    src={post.repostData.image} 
+                                    alt="Repost content" 
+                                    className="post-image" 
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={(e) => { e.stopPropagation(); openImageViewer([post.repostData.image], 0); }}
+                                  />
                                 )}
                               </div>
                            )}
@@ -1288,32 +1349,40 @@ const CapyHome = () => {
               </div>
               
               {(post.images || post.image) && (
-                <div className={`post-image-container ${post.images && post.images.length > 1 ? 'multi-image-grid' : ''}`} 
-                     style={post.images && post.images.length > 1 ? { 
-                       display: 'grid', 
-                       gridTemplateColumns: post.images.length === 1 ? '1fr' : 'repeat(2, 1fr)',
-                       gap: '4px' 
-                     } : {}}>
-                  {post.images ? (
-                    post.images.map((img, idx) => (
-                       <img 
-                         key={idx} 
-                         src={img.url} 
-                         alt={`Post content ${idx}`} 
-                         className="post-image" 
-                         style={{ 
-                           width: '100%', 
-                           height: '200px', 
-                           objectFit: 'cover',
-                           borderRadius: '4px'
-                         }} 
-                       />
-                    ))
-                  ) : (
-                    <img src={post.image} alt="Post content" className="post-image" />
-                  )}
-                </div>
-              )}
+                 <div className={`post-image-container ${post.images && post.images.length > 1 ? 'multi-image-grid' : ''}`} 
+                      style={post.images && post.images.length > 1 ? { 
+                        display: 'grid', 
+                        gridTemplateColumns: post.images.length === 1 ? '1fr' : 'repeat(2, 1fr)',
+                        gap: '4px' 
+                      } : {}}>
+                   {post.images ? (
+                     post.images.map((img, idx) => (
+                        <img 
+                          key={idx} 
+                          src={img.url} 
+                          alt={`Post content ${idx}`} 
+                          className="post-image" 
+                          style={{ 
+                            width: '100%', 
+                            height: '200px', 
+                            objectFit: 'cover',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                          }} 
+                          onClick={() => openImageViewer(post.images, idx)}
+                        />
+                     ))
+                   ) : (
+                     <img 
+                       src={post.image} 
+                       alt="Post content" 
+                       className="post-image" 
+                       style={{ cursor: 'pointer' }}
+                       onClick={() => openImageViewer([post.image], 0)}
+                     />
+                   )}
+                 </div>
+               )}
               
               <div className="post-actions">
                 <button 
@@ -1598,6 +1667,35 @@ const CapyHome = () => {
       <button className="fab-create" onClick={() => document.querySelector('.create-post-input').focus()}>
         <span>+</span>
       </button>
+
+      {/* Image Viewer Overlay */}
+      {isViewerOpen && (
+        <div className="image-viewer-overlay" onClick={closeImageViewer}>
+          <button className="viewer-close-btn" onClick={closeImageViewer}>×</button>
+          
+          <div className="viewer-content" onClick={(e) => e.stopPropagation()}>
+            {viewerIndex > 0 && (
+              <button className="viewer-nav-btn prev" onClick={prevImage}>‹</button>
+            )}
+            
+            <img 
+              src={viewerImages[viewerIndex]?.url} 
+              alt={`View ${viewerIndex + 1}`} 
+              className="viewer-image" 
+            />
+            
+            {viewerIndex < viewerImages.length - 1 && (
+              <button className="viewer-nav-btn next" onClick={nextImage}>›</button>
+            )}
+            
+            {viewerImages.length > 1 && (
+               <div className="viewer-counter">
+                 {viewerIndex + 1} / {viewerImages.length}
+               </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <CapyModal {...modalConfig} onClose={closeModal} />
     </div>
