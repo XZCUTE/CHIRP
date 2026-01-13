@@ -542,6 +542,34 @@ const CapyHome = () => {
     setImagePreview(null);
   };
 
+  const handlePaste = (e) => {
+    if (e.clipboardData && e.clipboardData.items) {
+      const items = e.clipboardData.items;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          e.preventDefault();
+          const file = items[i].getAsFile();
+          
+          // Validate file type
+          if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)/)) {
+            showModal({ message: "Only .jpg, .png, .gif, .webp formats are allowed!", title: "Invalid File" });
+            return;
+          }
+          
+          // Validate file size (5MB)
+          if (file.size > 5 * 1024 * 1024) {
+            showModal({ message: "File size must be less than 5MB!", title: "File Too Large" });
+            return;
+          }
+
+          setSelectedImage(file);
+          setImagePreview(URL.createObjectURL(file));
+          return;
+        }
+      }
+    }
+  };
+
   const handlePostSubmit = async () => {
     if (!newPostContent.trim() && !selectedImage) return;
     
@@ -865,6 +893,7 @@ const CapyHome = () => {
               value={newPostContent}
               onChange={(e) => setNewPostContent(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handlePostSubmit()}
+              onPaste={handlePaste}
             />
           </div>
 
