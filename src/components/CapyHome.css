@@ -1184,3 +1184,131 @@ body {
 .remove-image-btn:hover {
   background: rgba(0, 0, 0, 0.8);
 }
+/* Image Preview Grid */
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  padding: 0 16px 16px 16px;
+}
+
+.image-preview-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+}
+
+.image-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: background 0.2s;
+  z-index: 5;
+}
+
+.remove-image-btn:hover {
+  background: rgba(255, 77, 77, 0.8);
+}
+
+/* Post Image Grid */
+.post-image-grid {
+  display: grid;
+  gap: 2px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px solid var(--capy-border);
+  width: 100%;
+}
+
+.post-image-grid.count-1 {
+  grid-template-columns: 1fr;
+}
+
+.post-image-grid.count-2 {
+  grid-template-columns: 1fr 1fr;
+  aspect-ratio: 2/1;
+}
+
+.post-image-grid.count-3 {
+  grid-template-columns: 1fr 1fr;
+  aspect-ratio: 2/2; /* Squareish */
+}
+
+.post-image-grid.count-3 .post-image-wrapper:first-child {
+  grid-row: span 2;
+}
+
+.post-image-grid.count-4 {
+  grid-template-columns: 1fr 1fr;
+  aspect-ratio: 1;
+}
+
+.post-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.post-image-grid.count-1 .post-image-wrapper {
+  max-height: 500px;
+}
+
+.post-image-grid.count-2 .post-image-wrapper,
+.post-image-grid.count-3 .post-image-wrapper,
+.post-image-grid.count-4 .post-image-wrapper {
+  height: 100%;
+}
+
+.post-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Mini Grid for Reposts */
+.post-image-grid-mini {
+  display: grid;
+  gap: 2px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.post-image-grid-mini.count-1 { grid-template-columns: 1fr; }
+.post-image-grid-mini.count-2 { grid-template-columns: 1fr 1fr; }
+.post-image-grid-mini.count-3 { grid-template-columns: 1fr 1fr 1fr; } 
+.post-image-grid-mini.count-4 { grid-template-columns: 1fr 1fr; }
+
+.post-image-wrapper-mini {
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.post-image-wrapper-mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+

@@ -17,8 +17,8 @@ const CapyHome = () => {
   const [scanIndex, setScanIndex] = useState(0); // For scanning HN IDs
   const [trends, setTrends] = useState([]);
   const [newPostContent, setNewPostContent] = useState('');
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('CapyHome');
   const [loadingNews, setLoadingNews] = useState(true);
@@ -465,6 +465,7 @@ const CapyHome = () => {
                     avatar: sourcePost.avatar,
                     content: sourcePost.content,
                     image: sourcePost.image || null,
+                    images: sourcePost.images || null,
                     linkPreview: sourcePost.linkPreview || null,
                     timestamp: sourcePost.timestamp
                 }
@@ -515,73 +516,91 @@ const CapyHome = () => {
     }
   };
 
+  const processFiles = (files) => {
+    const validFiles = [];
+    const validPreviews = [];
+    let hasError = false;
+
+    files.forEach(file => {
+      // Validate file type
+      if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)/)) {
+        if (!hasError) showModal({ message: "Only .jpg, .png, .gif, .webp formats are allowed!", title: "Invalid File" });
+        hasError = true;
+        return;
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        if (!hasError) showModal({ message: "File size must be less than 5MB!", title: "File Too Large" });
+        hasError = true;
+        return;
+      }
+      
+      validFiles.push(file);
+      validPreviews.push(URL.createObjectURL(file));
+    });
+
+    if (validFiles.length > 0) {
+      setSelectedImages(prev => [...prev, ...validFiles]);
+      setImagePreviews(prev => [...prev, ...validPreviews]);
+    }
+  };
+
   const handleImageSelect = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)/)) {
-      showModal({ message: "Only .jpg, .png, .gif, .webp formats are allowed!", title: "Invalid File" });
-      return;
-    }
-
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      showModal({ message: "File size must be less than 5MB!", title: "File Too Large" });
-      return;
-    }
-
-    setSelectedImage(file);
-    setImagePreview(URL.createObjectURL(file));
-    // Clear input to allow selecting the same file again
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    processFiles(files);
     e.target.value = null;
   };
 
-  const removeSelectedImage = () => {
-    setSelectedImage(null);
-    setImagePreview(null);
+  const removeSelectedImage = (index) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handlePaste = (e) => {
     if (e.clipboardData && e.clipboardData.items) {
       const items = e.clipboardData.items;
+      const files = [];
+      let hasImage = false;
+
       for (let i = 0; i < items.length; i++) {
         if (items[i].type.indexOf('image') !== -1) {
-          e.preventDefault();
+          hasImage = true;
           const file = items[i].getAsFile();
-          
-          // Validate file type
-          if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)/)) {
-            showModal({ message: "Only .jpg, .png, .gif, .webp formats are allowed!", title: "Invalid File" });
-            return;
-          }
-          
-          // Validate file size (5MB)
-          if (file.size > 5 * 1024 * 1024) {
-            showModal({ message: "File size must be less than 5MB!", title: "File Too Large" });
-            return;
-          }
+          if (file) files.push(file);
+        }
+      }
 
-          setSelectedImage(file);
-          setImagePreview(URL.createObjectURL(file));
-          return;
+      if (hasImage) {
+        e.preventDefault();
+        if (files.length > 0) {
+          processFiles(files);
         }
       }
     }
   };
 
   const handlePostSubmit = async () => {
-    if (!newPostContent.trim() && !selectedImage) return;
+    if (!newPostContent.trim() && selectedImages.length === 0) return;
     
     setIsUploading(true);
     try {
-      let uploadedImageUrl = null;
-      let uploadedImageDeleteUrl = null;
+      const uploadedImages = [];
 
-      if (selectedImage) {
-        const uploadData = await uploadToImgBB(selectedImage);
-        uploadedImageUrl = uploadData.url;
-        uploadedImageDeleteUrl = uploadData.deleteUrl;
+      if (selectedImages.length > 0) {
+        const uploadPromises = selectedImages.map(image => uploadToImgBB(image));
+        const results = await Promise.all(uploadPromises);
+        
+        results.forEach(result => {
+           uploadedImages.push({
+             url: result.url,
+             deleteUrl: result.deleteUrl
+           });
+        });
       }
 
       const newPost = {
@@ -595,8 +614,9 @@ const CapyHome = () => {
         comments: 0,
         shares: 0,
         privacy: postPrivacy,
-        image: uploadedImageUrl,
-        imageDeleteUrl: uploadedImageDeleteUrl
+        images: uploadedImages.length > 0 ? uploadedImages : null,
+        image: uploadedImages.length > 0 ? uploadedImages[0].url : null,
+        imageDeleteUrl: uploadedImages.length > 0 ? uploadedImages[0].deleteUrl : null
       };
 
       if (showLinkPreview && linkPreviewData) {
@@ -613,8 +633,8 @@ const CapyHome = () => {
       setNewPostContent('');
       setShowLinkPreview(false);
       setLinkPreviewData(null);
-      setSelectedImage(null);
-      setImagePreview(null);
+      setSelectedImages([]);
+      setImagePreviews([]);
     } catch (error) {
       console.error("Error creating post:", error);
       showModal({ message: "Failed to create post. Please try again.", title: "Error" });
@@ -671,8 +691,13 @@ const CapyHome = () => {
       message: "Are you sure you want to delete this post?",
       onConfirm: async () => {
         try {
-          // Delete image from ImgBB if it exists
-          if (post.imageDeleteUrl) {
+          // Delete images from ImgBB if they exist
+          if (post.images) {
+            // Delete all images (best effort)
+            await Promise.all(post.images.map(img => 
+              img.deleteUrl ? deleteFromImgBB(img.deleteUrl) : Promise.resolve()
+            ));
+          } else if (post.imageDeleteUrl) {
             await deleteFromImgBB(post.imageDeleteUrl);
           }
 
@@ -898,10 +923,18 @@ const CapyHome = () => {
           </div>
 
           {/* Image Preview Area */}
-          {imagePreview && (
-            <div className="image-preview-area">
-              <img src={imagePreview} alt="Preview" className="image-preview-img" />
-              <button className="remove-image-btn" onClick={removeSelectedImage}>×</button>
+          {imagePreviews.length > 0 && (
+            <div className="image-preview-area" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px' }}>
+              {imagePreviews.map((preview, index) => (
+                <div key={index} className="image-preview-item" style={{ position: 'relative', flexShrink: 0 }}>
+                  <img src={preview} alt={`Preview ${index}`} className="image-preview-img" />
+                  <button 
+                    className="remove-image-btn" 
+                    onClick={() => removeSelectedImage(index)}
+                    style={{ position: 'absolute', top: '5px', right: '5px' }}
+                  >×</button>
+                </div>
+              ))}
             </div>
           )}
 
@@ -1014,11 +1047,12 @@ const CapyHome = () => {
               type="file" 
               id="image-upload" 
               accept="image/*" 
+              multiple
               style={{ display: 'none' }} 
               onChange={handleImageSelect}
             />
             <button 
-              className={`post-action-btn ${selectedImage ? 'active' : ''}`}
+              className={`post-action-btn ${selectedImages.length > 0 ? 'active' : ''}`}
               onClick={() => document.getElementById('image-upload').click()}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1194,9 +1228,26 @@ const CapyHome = () => {
                                 )}
                               </div>
                            )}
-                           {post.repostData.image && (
-                              <div className="post-image-container-mini">
-                                <img src={post.repostData.image} alt="Repost content" className="post-image" />
+                           {(post.repostData.images || post.repostData.image) && (
+                              <div className="post-image-container-mini"
+                                   style={post.repostData.images && post.repostData.images.length > 1 ? { 
+                                     display: 'grid', 
+                                     gridTemplateColumns: 'repeat(2, 1fr)',
+                                     gap: '2px' 
+                                   } : {}}>
+                                {post.repostData.images ? (
+                                  post.repostData.images.map((img, idx) => (
+                                    <img 
+                                      key={idx} 
+                                      src={img.url} 
+                                      alt={`Repost content ${idx}`} 
+                                      className="post-image" 
+                                      style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '4px' }}
+                                    />
+                                  ))
+                                ) : (
+                                  <img src={post.repostData.image} alt="Repost content" className="post-image" />
+                                )}
                               </div>
                            )}
                         </div>
@@ -1236,9 +1287,31 @@ const CapyHome = () => {
                 )}
               </div>
               
-              {post.image && (
-                <div className="post-image-container">
-                  <img src={post.image} alt="Post content" className="post-image" />
+              {(post.images || post.image) && (
+                <div className={`post-image-container ${post.images && post.images.length > 1 ? 'multi-image-grid' : ''}`} 
+                     style={post.images && post.images.length > 1 ? { 
+                       display: 'grid', 
+                       gridTemplateColumns: post.images.length === 1 ? '1fr' : 'repeat(2, 1fr)',
+                       gap: '4px' 
+                     } : {}}>
+                  {post.images ? (
+                    post.images.map((img, idx) => (
+                       <img 
+                         key={idx} 
+                         src={img.url} 
+                         alt={`Post content ${idx}`} 
+                         className="post-image" 
+                         style={{ 
+                           width: '100%', 
+                           height: '200px', 
+                           objectFit: 'cover',
+                           borderRadius: '4px'
+                         }} 
+                       />
+                    ))
+                  ) : (
+                    <img src={post.image} alt="Post content" className="post-image" />
+                  )}
                 </div>
               )}
               
