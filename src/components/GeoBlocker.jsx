@@ -1,4 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase';
 
 const GeoContext = createContext();
 
@@ -6,7 +8,7 @@ export const useGeo = () => useContext(GeoContext);
 
 const GeoBlocker = ({ children }) => {
   const [loading, setLoading] = useState(true);
-  const [isAllowed, setIsAllowed] = useState(true); // Default to true to not block initial render
+  const [isAllowed, setIsAllowed] = useState(true);
 
   const checkLocation = async () => {
     const hostname = window.location.hostname;
@@ -22,16 +24,22 @@ const GeoBlocker = ({ children }) => {
       
       const data = await response.json();
       
-      // Silently set allowed status
       if (data.country_code === 'JP') {
         setIsAllowed(true);
       } else {
         setIsAllowed(false);
+        // Force logout if not allowed
+        if (auth.currentUser) {
+          console.log("GeoBlocker: User outside Japan, forcing logout.");
+          await signOut(auth);
+        }
       }
     } catch (err) {
       console.error("Geo check failed:", err);
-      // Fail-closed: if we can't verify, we assume not allowed
       setIsAllowed(false);
+      if (auth.currentUser) {
+        await signOut(auth);
+      }
     } finally {
       setLoading(false);
     }
@@ -39,10 +47,14 @@ const GeoBlocker = ({ children }) => {
 
   useEffect(() => {
     checkLocation();
+    
+    // Periodically check location (every 5 minutes) in case user changes IP/VPN
+    const interval = setInterval(checkLocation, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <GeoContext.Provider value={{ isAllowed, loading }}>
+    <GeoContext.Provider value={{ isAllowed, loading, checkLocation }}>
       {children}
     </GeoContext.Provider>
   );
