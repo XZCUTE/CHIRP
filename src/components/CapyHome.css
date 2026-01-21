@@ -197,8 +197,8 @@ body {
 }
 
 .post-avatar {
-  width: 24px;
-  height: 24px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -1459,4 +1459,106 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* --- Cinematic Invisible Edge Navigation --- */
+.edge-zone {
+  position: absolute;
+  top: 0;
+  width: 22%;
+  height: 100%;
+  z-index: 5;
+  cursor: pointer;
+}
+
+.edge-zone.left {
+  left: 0;
+}
+
+.edge-zone.right {
+  right: 0;
+}
+
+/* Soft Gradient Highlight */
+.edge-zone.left::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0)
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.edge-zone.left:hover::after {
+  opacity: 1;
+}
+
+.edge-zone.right::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to left,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0)
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.edge-zone.right:hover::after {
+  opacity: 1;
+}
+
+/* Subtle Chevron Ghost */
+.edge-zone::before {
+  content: "‹";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 36px;
+  color: rgba(255, 255, 255, 0.35);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.edge-zone.left::before {
+  left: 18px;
+  content: "‹";
+}
+
+.edge-zone.right::before {
+  right: 18px;
+  content: "›";
+}
+
+.edge-zone:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Micro-interaction feel for main image */
+.modal-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-image-wrapper img {
+  transition: filter 0.25s ease;
+}
+
+.modal-image-wrapper:hover img {
+  filter: brightness(1.03);
 }

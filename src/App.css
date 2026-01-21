@@ -134,6 +134,13 @@ body {
 
 .App {
   text-align: center;
+  position: relative; /* Create stacking context for z-index: -1 children */
+  z-index: 0;
+}
+
+.main-content-wrapper {
+  position: relative;
+  z-index: 1; /* Ensure content is above the background effect */
 }
 
 /* Navbar Styles */

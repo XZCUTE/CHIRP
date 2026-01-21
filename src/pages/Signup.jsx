@@ -176,7 +176,8 @@ const Signup = () => {
       }
 
       // 3. Save User Data in Realtime DB
-      await set(ref(db, 'users/' + uid), {
+      const userData = {
+        displayName: fullName, // Use fullName as displayName
         fullName,
         email,
         birthday: `${bDay} ${bMonth} ${bYear}`,
@@ -184,7 +185,13 @@ const Signup = () => {
         uid: uid,
         createdAt: new Date().toISOString(),
         authProvider: googleUser ? 'google' : 'email'
-      });
+      };
+
+      if (googleUser && googleUser.photoURL) {
+        userData.photoURL = googleUser.photoURL;
+      }
+
+      await set(ref(db, 'users/' + uid), userData);
 
       if (googleUser) {
          // Google users are already verified and logged in (conceptually), but we need to ensure the session is active.

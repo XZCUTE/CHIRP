@@ -198,85 +198,69 @@ export default function PhotoViewer() {
   return (
     <div className={`photo-viewer-layout ${isModal ? 'modal-mode' : ''}`}>
       <div className="photo-viewer-media">
-        <button
+        <div
           onClick={() => navigate(-1)}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = '#ffffff';
+            e.currentTarget.style.transform = 'scale(1.08)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+          onMouseDown={(e) => {
+            e.currentTarget.style.transform = 'scale(0.95)';
+          }}
+          onMouseUp={(e) => {
+            e.currentTarget.style.transform = 'scale(1.08)';
+          }}
           style={{
             position: 'absolute',
-            top: 20,
-            left: 20,
-            background: 'rgba(255,255,255,0.1)',
-            border: 'none',
-            color: 'white',
-            fontSize: 30,
+            top: '20px',
+            left: '20px',
+            fontSize: '24px',
+            color: 'rgba(255,255,255,0.9)',
             cursor: 'pointer',
-            borderRadius: '50%',
-            width: 45,
-            height: 45,
+            zIndex: 20000,
+            textShadow: '0 0 10px rgba(0,0,0,0.6)',
+            transition: 'transform 0.1s ease, color 0.2s ease',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 20
+            width: 'auto',
+            height: 'auto',
+            background: 'transparent',
+            border: 'none',
+            userSelect: 'none'
           }}
         >
-          ×
-        </button>
+          ✕
+        </div>
+
+        {hasImages && images.length > 1 && (
+          <>
+            {/* Left Navigation Zone */}
+            <div
+              onClick={prev}
+              className="edge-zone left"
+            />
+
+            {/* Right Navigation Zone */}
+            <div
+              onClick={next}
+              className="edge-zone right"
+            />
+          </>
+        )}
 
         {hasImages && (
-          <>
-            {images.length > 1 && (
-              <button
-                onClick={prev}
-                style={{
-                  position: 'absolute',
-                  left: 20,
-                  background: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: 40,
-                  cursor: 'pointer',
-                  borderRadius: '50%',
-                  width: 60,
-                  height: 60,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 10
-                }}
-              >
-                ‹
-              </button>
-            )}
-
+          <div className="modal-image-wrapper">
             <img
               src={images[currentIndex].url}
               alt={`Image ${currentIndex}`}
               style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
             />
-
-            {images.length > 1 && (
-              <button
-                onClick={next}
-                style={{
-                  position: 'absolute',
-                  right: 20,
-                  background: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: 40,
-                  cursor: 'pointer',
-                  borderRadius: '50%',
-                  width: 60,
-                  height: 60,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 10
-                }}
-              >
-                ›
-              </button>
-            )}
-          </>
+          </div>
         )}
       </div>
 
@@ -305,8 +289,9 @@ export default function PhotoViewer() {
             className={`action-btn like-btn ${post.userVotes && user && post.userVotes[user.uid] === 1 ? 'active' : ''}`}
             onClick={() => handleVote(1)}
             title="Like"
+            style={{ fontSize: '15px' }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill={post.userVotes && user && post.userVotes[user.uid] === 1 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill={post.userVotes && user && post.userVotes[user.uid] === 1 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
             <span>{post.score || 0}</span>
@@ -317,7 +302,7 @@ export default function PhotoViewer() {
             onClick={() => handleVote(-1)}
             title="Dislike"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -330,8 +315,9 @@ export default function PhotoViewer() {
               const input = document.getElementById('photo-comment-input');
               if (input) input.focus();
             }}
+            style={{ fontSize: '15px' }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
             </svg>
             <span>Comment</span>
@@ -341,8 +327,9 @@ export default function PhotoViewer() {
             className="action-btn repost-btn"
             onClick={handleRepost}
             title="Repost"
+            style={{ fontSize: '15px' }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="17 1 21 5 17 9"></polyline>
               <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
               <polyline points="7 23 3 19 7 15"></polyline>

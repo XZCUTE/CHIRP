@@ -12,7 +12,12 @@ import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
 import PhotoViewer from './pages/PhotoViewer';
+import SearchPage from './pages/SearchPage';
+import PostPage from './pages/PostPage';
+import SettingsPage from './pages/SettingsPage';
 import GeoBlocker from './components/GeoBlocker';
+import Antigravity from './components/Antigravity';
+import { SettingsProvider, useSettings } from './context/SettingsContext';
 import './App.css';
 
 // Component to handle Auth redirects and state
@@ -92,6 +97,7 @@ const AuthGuard = ({ children }) => {
 const Layout = ({ children }) => {
   const location = useLocation();
   const prevPathRef = useRef(location.pathname);
+  const { showAntigravity, antigravityConfig } = useSettings();
 
   // Scroll to top on base route changes (ignore modal overlays)
   useEffect(() => {
@@ -118,10 +124,15 @@ const Layout = ({ children }) => {
   }, [location.pathname, location.state]);
 
   // Hide Navbar on Landing Page, Signup Page, and Forgot Password Page
-  const hideNavbar = location.pathname === '/' || location.pathname === '/signup' || location.pathname === '/forgot-password' || location.pathname === '/connections';
+  const hideNavbar = location.pathname === '/' || location.pathname === '/signup' || location.pathname === '/forgot-password' || location.pathname === '/connections' || location.pathname === '/settings';
 
   return (
     <div className="App">
+      {showAntigravity && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: -1, pointerEvents: 'none' }}>
+          <Antigravity {...antigravityConfig} />
+        </div>
+      )}
       {!hideNavbar && <Navbar />}
       <div className={!hideNavbar ? "main-content-wrapper" : ""}>
         {children}
@@ -133,13 +144,15 @@ const Layout = ({ children }) => {
 function App() {
   return (
     <GeoBlocker>
-      <Router>
-        <AuthGuard>
-          <Layout>
-            <ModalSwitch />
-          </Layout>
-        </AuthGuard>
-      </Router>
+      <SettingsProvider>
+        <Router>
+          <AuthGuard>
+            <Layout>
+              <ModalSwitch />
+            </Layout>
+          </AuthGuard>
+        </Router>
+      </SettingsProvider>
     </GeoBlocker>
   );
 }
@@ -159,6 +172,9 @@ function ModalSwitch() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/connections" element={<Cappies />} />
         <Route path="/devs" element={<CapyDEVS />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/post/:id" element={<PostPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/photo/:postId/:index" element={<PhotoViewer />} />
         <Route path="*" element={<LandingPage />} />
       </Routes>

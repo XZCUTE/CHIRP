@@ -96,7 +96,7 @@ const CapyHome = () => {
 
     const url = extractUrl(newPostContent);
     if (!url) {
-      setLinkPreviewData(null);
+      // Don't clear preview here, as we might have just stripped the URL to hide it
       return;
     }
 
@@ -111,28 +111,33 @@ const CapyHome = () => {
         hostname = 'Unknown Source';
       }
 
+      const updatePreview = (data) => {
+        if (isMounted) {
+          setLinkPreviewData(data);
+          setIsGeneratingPreview(false);
+          // Remove the URL from the content to hide it
+          setNewPostContent(prev => prev.replace(url, '').trim());
+        }
+      };
+
       // 1. Check for Special Handlers (YouTube, Vimeo, Images)
       // Image Direct Link
       if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
-        if (isMounted) {
-          setLinkPreviewData({
+        updatePreview({
             url: url,
             title: 'Image Preview',
             description: 'Click to view full image',
             image: url,
             type: 'image',
             source: 'Image'
-          });
-          setIsGeneratingPreview(false);
-        }
+        });
         return;
       }
 
       // YouTube
       const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
       if (ytMatch) {
-        if (isMounted) {
-          setLinkPreviewData({
+        updatePreview({
             url: url,
             type: 'video',
             source: 'YouTube',
@@ -141,17 +146,14 @@ const CapyHome = () => {
             description: 'Watch this video on Chirp',
             image: `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`,
             embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}`
-          });
-          setIsGeneratingPreview(false);
-        }
+        });
         return;
       }
       
       // Vimeo
       const vimeoMatch = url.match(/vimeo\.com\/([0-9]+)/);
       if (vimeoMatch) {
-        if (isMounted) {
-          setLinkPreviewData({
+        updatePreview({
             url: url,
             type: 'video',
             source: 'Vimeo',
@@ -160,9 +162,7 @@ const CapyHome = () => {
             description: 'Watch this video on Chirp',
             image: null, // Vimeo requires API for image, or let generic handler catch it if we want image
             embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}`
-          });
-          setIsGeneratingPreview(false);
-        }
+        });
         return;
       }
 
@@ -171,10 +171,10 @@ const CapyHome = () => {
         const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
         const result = await response.json();
 
-        if (result.status === 'success' && isMounted) {
+        if (result.status === 'success') {
           const { title, description, image, logo, publisher } = result.data;
           
-          setLinkPreviewData({
+          updatePreview({
             url: url,
             title: title || hostname,
             description: description || `Visit ${hostname} to see more.`,
@@ -187,17 +187,15 @@ const CapyHome = () => {
         }
       } catch (error) {
         console.warn("Link preview fetch failed, using fallback:", error);
-        if (isMounted) {
-          // Fallback to basic info
-          setLinkPreviewData({
+        // Fallback to basic info
+        updatePreview({
             url: url,
             title: hostname,
             description: `Visit ${hostname} to see more.`,
             image: `https://www.google.com/s2/favicons?domain=${hostname}&sz=256`,
             type: 'link',
             source: hostname
-          });
-        }
+        });
       } finally {
         if (isMounted) {
           setIsGeneratingPreview(false);
@@ -963,6 +961,10 @@ const CapyHome = () => {
                   navigate('/connections');
                 } else if (item.label === 'CapyDEVS') {
                   navigate('/devs');
+                } else if (item.label === 'Profile') {
+                  navigate('/profile');
+                } else if (item.label === 'Settings') {
+                  navigate('/settings');
                 }
               }}
             >
@@ -1191,7 +1193,7 @@ const CapyHome = () => {
                       name={post.author} 
                       uid={post.authorId} 
                       className="post-avatar"
-                      size={24}
+                      size={44}
                     />
                   )}
                 </div>
@@ -1894,7 +1896,6 @@ const ImageViewer = ({ images, initialIndex, onClose, post, comments = [], user 
         alignItems: 'stretch',
         justifyContent: 'flex-start',
       }}
-      onClick={onClose}
     >
       {/* Image Stage */}
       <div style={{ 
@@ -1907,57 +1908,41 @@ const ImageViewer = ({ images, initialIndex, onClose, post, comments = [], user 
         backgroundColor: '#000',
         minWidth: '0' // Fix flexbox overflow issue
       }}>
-        <button 
+        {/* New Close Button - Floating Icon Only */}
+        <div 
             onClick={onClose}
             style={{
-            position: 'absolute',
-            top: '20px',
-            left: '20px',
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: 'none',
-            color: 'white',
-            fontSize: '30px',
-            cursor: 'pointer',
-            borderRadius: '50%',
-            width: '45px',
-            height: '45px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 20,
-            transition: 'background 0.2s'
-            }}
-            onMouseOver={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
-            onMouseOut={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
-        >
-            ×
-        </button>
-
-        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => e.stopPropagation()}>
-            {images.length > 1 && (
-            <button 
-                onClick={handlePrev}
-                style={{
-                position: 'absolute',
+                position: 'fixed', // Changed from absolute to fixed to ensure it stays in view
+                top: '20px',
                 left: '20px',
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: 'none',
-                color: 'white',
-                fontSize: '40px',
+                color: 'rgba(255, 255, 255, 0.9)',
+                fontSize: '24px',
                 cursor: 'pointer',
-                borderRadius: '50%',
-                width: '60px',
-                height: '60px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 10
-                }}
-            >
-                ‹
-            </button>
-            )}
+                zIndex: 20000, // Increased Z-index to be above everything
+                lineHeight: 1,
+                textShadow: '0 0 10px rgba(0, 0, 0, 0.6)',
+                transition: 'transform 0.2s ease, color 0.2s ease',
+                userSelect: 'none'
+            }}
+            onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'scale(1.08)';
+                e.currentTarget.style.color = '#ffffff';
+            }}
+            onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
+            }}
+            onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'scale(0.95)';
+            }}
+            onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'scale(1.08)';
+            }}
+        >
+            ✕
+        </div>
 
+        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <img 
             src={images[currentIndex].url} 
             alt={`Full view ${currentIndex}`}
@@ -1968,30 +1953,6 @@ const ImageViewer = ({ images, initialIndex, onClose, post, comments = [], user 
                 boxShadow: '0 0 20px rgba(0,0,0,0.5)'
             }}
             />
-
-            {images.length > 1 && (
-            <button 
-                onClick={handleNext}
-                style={{
-                position: 'absolute',
-                right: '20px',
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: 'none',
-                color: 'white',
-                fontSize: '40px',
-                cursor: 'pointer',
-                borderRadius: '50%',
-                width: '60px',
-                height: '60px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 10
-                }}
-            >
-                ›
-            </button>
-            )}
         </div>
       </div>
 

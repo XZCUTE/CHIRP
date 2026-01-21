@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { getDatabase, ref, onValue, set, update, get, remove } from 'firebase/database';
+import { getDatabase, ref, onValue, set, update, get, remove, push } from 'firebase/database';
 import { auth } from '../firebase';
 import InitialsAvatar from './InitialsAvatar';
 import './MiniProfileCard.css';
@@ -98,26 +98,69 @@ const MiniProfileCard = ({ targetUid, position, onClose, initialName, initialAva
     if (!currentUser || !targetUid || isMe) return;
 
     const friendsRef = ref(db, `users/${currentUser.uid}/friends/${targetUid}`);
+    const requestRef = ref(db, `users/${targetUid}/friendRequests/${currentUser.uid}`);
+    
+    let isFriend = false;
+
+    // Listen to Friend Status
     const unsubFriends = onValue(friendsRef, (snapshot) => {
       if (snapshot.exists()) {
+        isFriend = true;
         setRequestStatus('friends');
       } else {
-        const requestRef = ref(db, `users/${targetUid}/friendRequests/${currentUser.uid}`);
-        onValue(requestRef, (snapshot) => {
-          if (snapshot.exists()) {
-            setRequestStatus('pending');
-          } else {
-            setRequestStatus('none');
-          }
-        }, { onlyOnce: true });
+        isFriend = false;
+        // If not friend, check request status immediately (handled by other listener, but check if we need to reset)
+        // We defer to the request listener
       }
     });
 
-    return () => unsubFriends();
+    // Listen to Request Status
+    const unsubRequest = onValue(requestRef, (snapshot) => {
+      // If we just initiated an action (like Add Cappy), ignore the very next update if it's "null"/empty,
+      // because that might be a stale read or initial state before our write propagates locally.
+      // Actually, Firebase local writes are synchronous. 
+      // The issue might be that we are setting "pending" optimistically, and then this listener fires with "none" from the server state?
+      
+      if (actionInProgress.current) {
+        // If we are in the middle of an action, we trust our optimistic update more than the listener for a moment.
+        // But we need to reset this flag eventually.
+        setTimeout(() => { actionInProgress.current = false; }, 500);
+        
+        // If snapshot exists, it confirms our action, so we can accept it.
+        if (snapshot.exists()) {
+           setRequestStatus(prev => prev === 'friends' ? 'friends' : 'pending');
+           actionInProgress.current = false; // Sync established
+        }
+        // If snapshot does NOT exist, it might be the "old" state. Ignore it if we expect it to exist.
+        return;
+      }
+
+      if (snapshot.exists()) {
+         setRequestStatus(prev => prev === 'friends' ? 'friends' : 'pending');
+      } else {
+         setRequestStatus(prev => prev === 'friends' ? 'friends' : 'none');
+      }
+    });
+
+    return () => {
+      unsubFriends();
+      unsubRequest();
+    };
   }, [currentUser, targetUid, isMe, db]);
 
-  const handleAddCappy = async () => {
+  // Track if we are currently performing an action to prevent listener jitter
+  const actionInProgress = useRef(false);
+
+  const handleAddCappy = async (e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     if (!currentUser || isMe) return;
+
+    // Optimistic UI update: Show "Request Sent" immediately
+    setRequestStatus('pending');
+    actionInProgress.current = true;
 
     try {
       // 1. Add to target's friendRequests
@@ -139,10 +182,34 @@ const MiniProfileCard = ({ targetUid, position, onClose, initialName, initialAva
         timestamp: Date.now(),
         read: false
       });
-
-      setRequestStatus('pending');
+      
     } catch (error) {
       console.error("Error sending friend request:", error);
+      // Revert if failed
+      setRequestStatus('none');
+    }
+  };
+
+  const handleCancelRequest = async (e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    if (!currentUser || isMe) return;
+
+    // Optimistic UI update: Show "Add Cappy" immediately
+    setRequestStatus('none');
+
+    try {
+      // Remove request from target's friendRequests
+      await remove(ref(db, `users/${targetUid}/friendRequests/${currentUser.uid}`));
+      
+      // We don't necessarily need to remove the notification, but we could if we tracked its ID.
+      // For now, just removing the request is enough to reset the state.
+    } catch (error) {
+      console.error("Error canceling friend request:", error);
+      // Revert if failed
+      setRequestStatus('pending');
     }
   };
 
@@ -205,7 +272,15 @@ const MiniProfileCard = ({ targetUid, position, onClose, initialName, initialAva
                     <button className="add-cappy-btn" onClick={handleAddCappy}>Add Cappy</button>
                   )}
                   {requestStatus === 'pending' && (
-                    <button className="add-cappy-btn pending" disabled>Request Sent</button>
+                    <button 
+                      className="add-cappy-btn pending" 
+                      onClick={handleCancelRequest}
+                      style={{ cursor: 'pointer', opacity: 1 }}
+                      onMouseEnter={(e) => e.target.textContent = 'Cancel Request'}
+                      onMouseLeave={(e) => e.target.textContent = 'Request Sent'}
+                    >
+                      Request Sent
+                    </button>
                   )}
                   {requestStatus === 'friends' && (
                     <button className="add-cappy-btn friends">Friends</button>

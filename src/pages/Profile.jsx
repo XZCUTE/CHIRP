@@ -98,6 +98,18 @@ const Profile = () => {
               role: data.role || 'Green Hat 🟢'
             });
             
+            // Auto-repair profile if missing data (e.g. Google Sign-In missing fields)
+            const updates = {};
+            if (!data.displayName && currentUser.displayName) {
+               updates.displayName = currentUser.displayName;
+            }
+            if (!data.photoURL && currentUser.photoURL) {
+               updates.photoURL = currentUser.photoURL;
+            }
+            if (Object.keys(updates).length > 0) {
+               update(userRef, updates).catch(err => console.error("Error auto-updating profile:", err));
+            }
+
             // Count friends
             if (data.friends) {
               setFriendsCount(Object.keys(data.friends).length);
@@ -311,10 +323,16 @@ const Profile = () => {
       });
 
       // Update Auth Profile for synchronization
-      await updateProfile(user, {
-        displayName: editForm.displayName,
-        photoURL: photoURL
-      });
+      // Wrap in try-catch to ignore errors if it fails (e.g. for Google users sometimes)
+      try {
+        await updateProfile(user, {
+          displayName: editForm.displayName,
+          photoURL: photoURL
+        });
+      } catch (authError) {
+        console.warn("Could not update Firebase Auth profile (likely Google user limitation):", authError);
+        // Continue anyway, as we updated the database which is what matters for the app
+      }
 
       // Notify other components (like Navbar) of the update
       window.dispatchEvent(new Event('profileUpdated'));
@@ -924,7 +942,7 @@ const Profile = () => {
                       name={post.author} 
                       uid={post.authorId} 
                       className="post-avatar"
-                      size={24}
+                      size={44}
                     />
                   )}
                 </div>
