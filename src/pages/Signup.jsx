@@ -5,8 +5,10 @@ import { ref, set } from 'firebase/database';
 import CustomCaptcha from '../components/CustomCaptcha';
 import { auth, db } from '../firebase';
 import { checkRateLimit } from '../utils/rateLimiter';
+import { useGeo } from '../components/GeoBlocker';
 
 const Signup = () => {
+  const { isAllowed } = useGeo();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -102,6 +104,13 @@ const Signup = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    // Stealth Geo-Block
+    if (!isAllowed) {
+      setError('No Thank!');
+      setLoading(false);
+      return;
+    }
 
     // Rate Limiting Check
     const rateLimit = checkRateLimit('signup');

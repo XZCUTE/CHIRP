@@ -4,38 +4,34 @@ const GeoContext = createContext();
 
 export const useGeo = () => useContext(GeoContext);
 
-export const GeoProvider = ({ children }) => {
+const GeoBlocker = ({ children }) => {
   const [loading, setLoading] = useState(true);
-  const [allowed, setAllowed] = useState(false);
-  const [error, setError] = useState(null);
+  const [isAllowed, setIsAllowed] = useState(true); // Default to true to not block initial render
 
   const checkLocation = async () => {
-    setLoading(true);
-    setError(null);
-    
     const hostname = window.location.hostname;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      setAllowed(true);
+      setIsAllowed(true);
       setLoading(false);
       return;
     }
 
     try {
       const response = await fetch('https://ipapi.co/json/');
-      if (!response.ok) throw new Error("Connection Error");
+      if (!response.ok) throw new Error("Failed to fetch location data");
       
       const data = await response.json();
       
-      // Strictly Japan
+      // Silently set allowed status
       if (data.country_code === 'JP') {
-        setAllowed(true);
+        setIsAllowed(true);
       } else {
-        setAllowed(false);
+        setIsAllowed(false);
       }
     } catch (err) {
       console.error("Geo check failed:", err);
-      setAllowed(false);
-      setError("Unable to establish secure connection.");
+      // Fail-closed: if we can't verify, we assume not allowed
+      setIsAllowed(false);
     } finally {
       setLoading(false);
     }
@@ -46,33 +42,10 @@ export const GeoProvider = ({ children }) => {
   }, []);
 
   return (
-    <GeoContext.Provider value={{ allowed, loading, error, retry: checkLocation }}>
+    <GeoContext.Provider value={{ isAllowed, loading }}>
       {children}
     </GeoContext.Provider>
   );
-};
-
-// Keeping the component for backward compatibility if needed, but we'll use the Provider
-const GeoBlocker = ({ children }) => {
-  const { allowed, loading } = useGeo();
-
-  if (loading) {
-    return (
-      <div style={{ 
-        height: '100vh', 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        backgroundColor: '#0f0f0f', 
-        color: '#D2691E',
-        fontFamily: 'monospace'
-      }}>
-        <h2>Initializing...</h2>
-      </div>
-    );
-  }
-
-  return children;
 };
 
 export default GeoBlocker;

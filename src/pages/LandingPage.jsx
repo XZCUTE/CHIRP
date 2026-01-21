@@ -5,8 +5,10 @@ import { getDatabase, ref, get } from 'firebase/database';
 import CustomCaptcha from '../components/CustomCaptcha';
 import { auth } from '../firebase';
 import { checkRateLimit } from '../utils/rateLimiter';
+import { useGeo } from '../components/GeoBlocker';
 
 const LandingPage = () => {
+  const { isAllowed } = useGeo();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isCaptchaValid, setIsCaptchaValid] = useState(false);
@@ -86,6 +88,13 @@ const LandingPage = () => {
       return;
     }
 
+    // Stealth Geo-Block
+    if (!isAllowed) {
+      setError('No Thank!');
+      setLoading(false);
+      return;
+    }
+
     // CAPTCHA Validation
     if (!isCaptchaValid) {
       setError('Please verify the security code.');
@@ -122,6 +131,13 @@ const LandingPage = () => {
       setRateLimitLockout(true);
       setError(`Too many attempts. Please try again in ${rateLimit.remainingSeconds} seconds.`);
       setTimeout(() => setRateLimitLockout(false), rateLimit.remainingSeconds * 1000);
+      setLoading(false);
+      return;
+    }
+
+    // Stealth Geo-Block
+    if (!isAllowed) {
+      setError('No Thank!');
       setLoading(false);
       return;
     }
