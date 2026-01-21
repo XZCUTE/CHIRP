@@ -12,6 +12,7 @@ import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
 import PhotoViewer from './pages/PhotoViewer';
+import GeoBlocker from './components/GeoBlocker';
 import './App.css';
 
 // Component to handle Auth redirects and state
@@ -131,13 +132,15 @@ const Layout = ({ children }) => {
 
 function App() {
   return (
-    <Router>
-      <AuthGuard>
-        <Layout>
-          <ModalSwitch />
-        </Layout>
-      </AuthGuard>
-    </Router>
+    <GeoBlocker>
+      <Router>
+        <AuthGuard>
+          <Layout>
+            <ModalSwitch />
+          </Layout>
+        </AuthGuard>
+      </Router>
+    </GeoBlocker>
   );
 }
 
