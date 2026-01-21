@@ -5,6 +5,7 @@ import { getAuth } from 'firebase/auth';
 import './CapyHome.css';
 import CapyModal from './CapyModal';
 import InitialsAvatar from './InitialsAvatar';
+import MiniProfileCard from './MiniProfileCard';
 
 import { uploadToImgBB, deleteFromImgBB } from '../utils/imgbb';
 
@@ -24,6 +25,22 @@ const CapyHome = () => {
   const [activeTab, setActiveTab] = useState('CapyHome');
   const [loadingNews, setLoadingNews] = useState(true);
   const [selectedTrend, setSelectedTrend] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null); // { uid, x, y }
+
+  const handleUserClick = (e, uid, initialName, initialAvatar) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    
+    // Calculate position relative to viewport
+    // Default to showing on the right side
+    setSelectedUser({
+      uid,
+      x: rect.right + 10, // Show to the right of the element
+      y: rect.top, // Align with top of element
+      initialName,
+      initialAvatar
+    });
+  };
   const [trendTimeframe, setTrendTimeframe] = useState('daily');
   const [trendLimit, setTrendLimit] = useState(3);
   const [myFriends, setMyFriends] = useState({});
@@ -1162,22 +1179,24 @@ const CapyHome = () => {
               style={{ animation: `slideUp 0.5s ease-out ${index * 0.1}s backwards` }}
             >
               <div className="post-header">
-                {((user && post.authorId === user.uid && user.photoURL) || (post.authorId !== user?.uid && post.avatar && !post.avatar.includes('dicebear'))) ? (
-                  <img 
-                    src={(user && post.authorId === user.uid) ? user.photoURL : post.avatar} 
-                    alt={post.author} 
-                    className="post-avatar" 
-                  />
-                ) : (
-                  <InitialsAvatar 
-                    name={post.author} 
-                    uid={post.authorId} 
-                    className="post-avatar"
-                    size={40}
-                  />
-                )}
+                <div className="post-avatar-wrapper" onClick={(e) => handleUserClick(e, post.authorId, post.author, post.avatar)} style={{cursor: 'pointer'}}>
+                  {((user && post.authorId === user.uid && user.photoURL) || (post.authorId !== user?.uid && post.avatar && !post.avatar.includes('dicebear'))) ? (
+                    <img 
+                      src={(user && post.authorId === user.uid) ? user.photoURL : post.avatar} 
+                      alt={post.author} 
+                      className="post-avatar" 
+                    />
+                  ) : (
+                    <InitialsAvatar 
+                      name={post.author} 
+                      uid={post.authorId} 
+                      className="post-avatar"
+                      size={24}
+                    />
+                  )}
+                </div>
                 <div className="post-info">
-                  <span className="post-author">{post.author}</span>
+                  <span className="post-author" onClick={(e) => handleUserClick(e, post.authorId, post.author, post.avatar)} style={{cursor: 'pointer'}}>{post.author}</span>
                   <span className="post-separator">•</span>
                   <span className="post-time">
                     {getRelativeTime(post.timestamp)}
@@ -1628,6 +1647,17 @@ const CapyHome = () => {
 
       <CapyModal {...modalConfig} onClose={closeModal} />
       
+      {/* Mini Profile Card */}
+      {selectedUser && (
+        <MiniProfileCard 
+          targetUid={selectedUser.uid} 
+          position={{ x: selectedUser.x, y: selectedUser.y }}
+          initialName={selectedUser.initialName}
+          initialAvatar={selectedUser.initialAvatar}
+          onClose={() => setSelectedUser(null)} 
+        />
+      )}
+
       {lightboxOpen && (
         <ImageViewer 
           images={lightboxImages} 

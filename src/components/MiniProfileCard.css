@@ -1,0 +1,153 @@
+.mini-profile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 3000;
+}
+
+.mini-profile-card {
+  background: #18191a; /* Solid background to remove transparency */
+  width: 350px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--capy-border);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mini-cover {
+  height: 100px;
+  background-size: cover;
+  background-position: center;
+}
+
+.mini-info-section {
+  padding: 0 20px 20px;
+  position: relative;
+}
+
+.mini-avatar-wrapper {
+  margin-top: -40px;
+  margin-bottom: 12px;
+  display: inline-block;
+}
+
+.mini-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid #18191a;
+  object-fit: cover;
+  background: #333;
+}
+
+.mini-details {
+  text-align: left;
+}
+
+.mini-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.mini-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--capy-text);
+  margin: 0;
+}
+
+.mini-role {
+  font-size: 10px;
+  background: rgba(210, 105, 30, 0.15);
+  color: var(--capy-accent);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.mini-bio {
+  color: var(--capy-text-secondary);
+  font-size: 13px;
+  margin: 8px 0 16px;
+  line-height: 1.4;
+}
+
+.mini-stats {
+  display: flex;
+  gap: 20px;
+  padding: 12px 0;
+  border-top: 1px solid var(--capy-border);
+  border-bottom: 1px solid var(--capy-border);
+  margin-bottom: 16px;
+}
+
+.mini-stat-item {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.mini-stat-value {
+  font-weight: 700;
+  color: var(--capy-text);
+  font-size: 14px;
+}
+
+.mini-stat-label {
+  color: var(--capy-text-secondary);
+  font-size: 12px;
+}
+
+.mini-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.add-cappy-btn {
+  background: transparent;
+  border: 1px solid var(--capy-text-secondary);
+  color: var(--capy-text);
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.add-cappy-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--capy-text);
+}
+
+.add-cappy-btn.pending, .add-cappy-btn.friends {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.add-cappy-btn.me {
+  background: var(--capy-accent);
+  border-color: var(--capy-accent);
+  color: white;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

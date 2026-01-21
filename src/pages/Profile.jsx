@@ -7,6 +7,7 @@ import './Profile.css';
 import '../components/CapyHome.css';
 import CapyModal from '../components/CapyModal';
 import InitialsAvatar from '../components/InitialsAvatar';
+import MiniProfileCard from '../components/MiniProfileCard';
 import { uploadToImgBB, deleteFromImgBB } from '../utils/imgbb';
 import { extractColor } from '../utils/colorUtils';
 
@@ -25,6 +26,22 @@ const Profile = () => {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [isAvatarRemoved, setIsAvatarRemoved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null); // { uid, x, y }
+
+  const handleUserClick = (e, uid, initialName, initialAvatar) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    
+    // Calculate position relative to viewport
+    // Default to showing on the right side
+    setSelectedUser({
+      uid,
+      x: rect.right + 10, // Show to the right of the element
+      y: rect.top, // Align with top of element
+      initialName,
+      initialAvatar
+    });
+  };
 
   // Cover Photo State
   const [selectedCover, setSelectedCover] = useState(null);
@@ -895,6 +912,7 @@ const Profile = () => {
                 style={{ animation: `slideUp 0.5s ease-out ${index * 0.1}s backwards` }}
               >
                 <div className="post-header">
+                  <div className="post-avatar-wrapper" onClick={(e) => handleUserClick(e, post.authorId, post.author, post.avatar)} style={{cursor: 'pointer'}}>
                   {((user && post.authorId === user.uid && user.photoURL) || (post.authorId !== user?.uid && post.avatar && !post.avatar.includes('dicebear'))) ? (
                     <img 
                       src={(user && post.authorId === user.uid) ? user.photoURL : post.avatar} 
@@ -906,11 +924,12 @@ const Profile = () => {
                       name={post.author} 
                       uid={post.authorId} 
                       className="post-avatar"
-                      size={40}
+                      size={24}
                     />
                   )}
-                  <div className="post-info">
-                    <span className="post-author">{post.author}</span>
+                </div>
+                <div className="post-info">
+                  <span className="post-author" onClick={(e) => handleUserClick(e, post.authorId, post.author, post.avatar)} style={{cursor: 'pointer'}}>{post.author}</span>
                     <span className="post-separator">•</span>
                     <span className="post-time">
                       {getRelativeTime(post.timestamp)}
@@ -1239,6 +1258,17 @@ const Profile = () => {
       </div>
 
       <CapyModal {...modalConfig} onClose={closeModal} />
+
+      {/* Mini Profile Card */}
+      {selectedUser && (
+        <MiniProfileCard 
+          targetUid={selectedUser.uid} 
+          position={{ x: selectedUser.x, y: selectedUser.y }}
+          initialName={selectedUser.initialName}
+          initialAvatar={selectedUser.initialAvatar}
+          onClose={() => setSelectedUser(null)} 
+        />
+      )}
     </div>
   );
 };
