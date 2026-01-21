@@ -7,7 +7,7 @@ export const useSettings = () => useContext(SettingsContext);
 export const SettingsProvider = ({ children }) => {
   const [showAntigravity, setShowAntigravity] = useState(() => {
     const saved = localStorage.getItem('capy_antigravity');
-    return saved !== null ? JSON.parse(saved) : true; // Default to true
+    return saved !== null ? JSON.parse(saved) : false; // Default to false
   });
 
   const [antigravityConfig, setAntigravityConfig] = useState(() => {
@@ -47,6 +47,24 @@ export const SettingsProvider = ({ children }) => {
       return updated;
     });
   };
+
+  // Sync settings across tabs
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'capy_antigravity') {
+        if (e.newValue !== null) {
+          setShowAntigravity(JSON.parse(e.newValue));
+        }
+      } else if (e.key === 'capy_antigravity_config') {
+        if (e.newValue !== null) {
+          setAntigravityConfig(prev => ({ ...prev, ...JSON.parse(e.newValue) }));
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
     <SettingsContext.Provider value={{ 
