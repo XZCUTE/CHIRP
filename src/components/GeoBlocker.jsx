@@ -19,15 +19,37 @@ const GeoBlocker = ({ children }) => {
     }
 
     try {
-      const response = await fetch('https://ipapi.co/json/');
+      // 1. Check Cache first to avoid 429 errors
+      const cachedStatus = sessionStorage.getItem('geo_allowed');
+      const cacheTimestamp = sessionStorage.getItem('geo_timestamp');
+      const now = Date.now();
+
+      // If we checked in the last 10 minutes, use cache
+      if (cachedStatus !== null && cacheTimestamp && (now - parseInt(cacheTimestamp) < 10 * 60 * 1000)) {
+        const allowed = cachedStatus === 'true';
+        setIsAllowed(allowed);
+        if (!allowed && auth.currentUser) {
+          await signOut(auth);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // 2. Fetch location data from ipwho.is (Better CORS support and higher limits)
+      const response = await fetch('https://ipwho.is/');
       if (!response.ok) throw new Error("Failed to fetch location data");
       
       const data = await response.json();
       
-      if (data.country_code === 'JP') {
-        setIsAllowed(true);
-      } else {
-        setIsAllowed(false);
+      // Check if country is Japan (JP)
+      const allowed = data.country_code === 'JP';
+      setIsAllowed(allowed);
+      
+      // Update Cache
+      sessionStorage.setItem('geo_allowed', allowed.toString());
+      sessionStorage.setItem('geo_timestamp', now.toString());
+
+      if (!allowed) {
         // Force logout if not allowed
         if (auth.currentUser) {
           console.log("GeoBlocker: User outside Japan, forcing logout.");

@@ -1,0 +1,20 @@
+{
+  "name": "CHIRP",
+  "short_name": "CHIRP",
+  "icons": [
+    {
+      "src": "/Chirp.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Chirp.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#D2691E",
+  "background_color": "#0f0f0f",
+  "display": "standalone",
+  "start_url": "/"
+}
