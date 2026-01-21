@@ -32,9 +32,6 @@ const Profile = () => {
   const [isCoverRemoved, setIsCoverRemoved] = useState(false);
   const [themeColor, setThemeColor] = useState(null);
   
-  // About Modal State
-  const [showAboutModal, setShowAboutModal] = useState(false);
-  
   // Post Interaction State
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [editingPostId, setEditingPostId] = useState(null);
@@ -346,18 +343,6 @@ const Profile = () => {
         }
       }
     });
-  };
-
-  const handleTogglePrivacy = async (field) => {
-    if (!user) return;
-    const currentVal = profileData[field] || false;
-    try {
-      await update(ref(db, `users/${user.uid}`), {
-        [field]: !currentVal
-      });
-    } catch (error) {
-      console.error("Error toggling privacy:", error);
-    }
   };
 
   if (!user || !profileData) {
@@ -796,20 +781,7 @@ const Profile = () => {
                     </button>
                   </>
                 ) : (
-                  <>
-                    <button className="edit-profile-btn" onClick={() => setIsEditing(true)}>Edit Profile</button>
-                    <button 
-                      className="about-btn-icon" 
-                      onClick={() => setShowAboutModal(true)}
-                      title="About"
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                      </svg>
-                    </button>
-                  </>
+                  <button className="edit-profile-btn" onClick={() => setIsEditing(true)}>Edit Profile</button>
                 )}
               </div>
             </div>
@@ -1265,54 +1237,6 @@ const Profile = () => {
 
         {/* Sidebar removed as requested */}
       </div>
-
-      {/* About Modal */}
-      {showAboutModal && (
-        <div className="modal-overlay" onClick={() => setShowAboutModal(false)}>
-          <div className="capy-modal about-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>About</h3>
-              <button className="close-btn" onClick={() => setShowAboutModal(false)}>×</button>
-            </div>
-            <div className="modal-content">
-              <div className="about-item">
-                <span className="about-label">Joined</span>
-                <span className="about-value">{new Date(user.metadata.creationTime).toLocaleDateString()}</span>
-              </div>
-              
-              <div className="about-item">
-                <span className="about-label">Email</span>
-                <div className="about-value-container">
-                  <span className="about-value">{user.email}</span>
-                  <label className="privacy-toggle" title="Toggle visibility to others">
-                    <input 
-                      type="checkbox" 
-                      checked={profileData.emailVisible || false}
-                      onChange={() => handleTogglePrivacy('emailVisible')}
-                    />
-                    <span className="toggle-label">Reveal</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="about-item">
-                <span className="about-label">Birthdate</span>
-                <div className="about-value-container">
-                  <span className="about-value">{profileData.birthdate || 'Not set'}</span>
-                  <label className="privacy-toggle" title="Toggle visibility to others">
-                    <input 
-                      type="checkbox" 
-                      checked={profileData.birthdateVisible || false}
-                      onChange={() => handleTogglePrivacy('birthdateVisible')}
-                    />
-                    <span className="toggle-label">Reveal</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <CapyModal {...modalConfig} onClose={closeModal} />
     </div>
