@@ -6,6 +6,7 @@ import CustomCaptcha from '../components/CustomCaptcha';
 import { auth } from '../firebase';
 import { checkRateLimit } from '../utils/rateLimiter';
 import { useGeo } from '../components/GeoBlocker';
+import { getRandomBlockMessage } from '../utils/funMessages';
 
 const LandingPage = () => {
   const { isAllowed } = useGeo();
@@ -90,7 +91,7 @@ const LandingPage = () => {
 
     // Stealth Geo-Block
     if (!isAllowed) {
-      setError('No Thank!');
+      setError(getRandomBlockMessage());
       setLoading(false);
       return;
     }
@@ -137,7 +138,7 @@ const LandingPage = () => {
 
     // Stealth Geo-Block
     if (!isAllowed) {
-      setError('No Thank!');
+      setError(getRandomBlockMessage());
       setLoading(false);
       return;
     }

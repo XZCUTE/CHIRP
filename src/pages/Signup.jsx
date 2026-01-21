@@ -6,6 +6,7 @@ import CustomCaptcha from '../components/CustomCaptcha';
 import { auth, db } from '../firebase';
 import { checkRateLimit } from '../utils/rateLimiter';
 import { useGeo } from '../components/GeoBlocker';
+import { getRandomBlockMessage } from '../utils/funMessages';
 
 const Signup = () => {
   const { isAllowed } = useGeo();
@@ -107,7 +108,7 @@ const Signup = () => {
 
     // Stealth Geo-Block
     if (!isAllowed) {
-      setError('No Thank!');
+      setError(getRandomBlockMessage());
       setLoading(false);
       return;
     }
