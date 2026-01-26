@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getDatabase, ref, onValue, push, runTransaction, serverTimestamp } from 'firebase/database';
+import { getDatabase, ref, onValue, push, runTransaction, serverTimestamp, update } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 import InitialsAvatar from '../components/InitialsAvatar';
 import '../components/CapyHome.css';
@@ -39,6 +39,19 @@ export default function PhotoViewer() {
   const [comments, setComments] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(Number(index) || 0);
   const [commentText, setCommentText] = useState('');
+  const [savedPosts, setSavedPosts] = useState({});
+
+  useEffect(() => {
+    if (!user) {
+      setSavedPosts({});
+      return;
+    }
+    const savedRef = ref(db, `users/${user.uid}/savedPosts`);
+    const unsubscribe = onValue(savedRef, (snapshot) => {
+      setSavedPosts(snapshot.val() || {});
+    });
+    return () => unsubscribe();
+  }, [user, db]);
 
   useEffect(() => {
     // Lock page scroll
@@ -185,6 +198,24 @@ export default function PhotoViewer() {
     navigate('/home');
   };
 
+  const handleSavePost = async () => {
+    if (!user) return alert("Please login to save posts!");
+    
+    const isSaved = savedPosts[postId];
+    const updates = {};
+    if (isSaved) {
+      updates[`users/${user.uid}/savedPosts/${postId}`] = null;
+    } else {
+      updates[`users/${user.uid}/savedPosts/${postId}`] = true;
+    }
+    
+    try {
+      await update(ref(db), updates);
+    } catch (error) {
+      console.error("Error toggling save:", error);
+    }
+  };
+
   const isModal = !!locationState?.backgroundLocation;
 
   if (!post) {
@@ -289,9 +320,8 @@ export default function PhotoViewer() {
             className={`action-btn like-btn ${post.userVotes && user && post.userVotes[user.uid] === 1 ? 'active' : ''}`}
             onClick={() => handleVote(1)}
             title="Like"
-            style={{ fontSize: '15px' }}
           >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill={post.userVotes && user && post.userVotes[user.uid] === 1 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill={post.userVotes && user && post.userVotes[user.uid] === 1 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
             <span>{post.score || 0}</span>
@@ -302,7 +332,7 @@ export default function PhotoViewer() {
             onClick={() => handleVote(-1)}
             title="Dislike"
           >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -315,27 +345,35 @@ export default function PhotoViewer() {
               const input = document.getElementById('photo-comment-input');
               if (input) input.focus();
             }}
-            style={{ fontSize: '15px' }}
           >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
             </svg>
-            <span>Comment</span>
+            {post.comments > 0 && <span>{post.comments}</span>}
           </button>
           
           <button 
             className="action-btn repost-btn"
             onClick={handleRepost}
             title="Repost"
-            style={{ fontSize: '15px' }}
           >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="17 1 21 5 17 9"></polyline>
               <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
               <polyline points="7 23 3 19 7 15"></polyline>
               <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
             </svg>
-            <span>Repost</span>
+            {post.shares > 0 && <span>{post.shares}</span>}
+          </button>
+
+          <button 
+            className={`action-btn save-btn ${savedPosts[post.id] ? 'active' : ''}`}
+            onClick={handleSavePost}
+            title={savedPosts[post.id] ? "Unsave" : "Save"}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill={savedPosts[post.id] ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
           </button>
         </div>
         

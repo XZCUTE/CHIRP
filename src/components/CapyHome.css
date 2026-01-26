@@ -342,7 +342,7 @@ body {
 }
 
 .save-btn {
-  background: transparent;
+  background: transparent !important;
   border: none;
   color: var(--capy-text-secondary);
   cursor: pointer;
@@ -364,15 +364,17 @@ body {
 }
 
 .save-btn:hover {
-  background: transparent;
+  background: transparent !important;
+  color: inherit;
 }
 
 .save-btn.active {
-  color: var(--capy-text);
+  color: #ff9800;
+  background: transparent !important;
 }
 
 .save-btn.active svg {
-  fill: var(--capy-text);
+  fill: #ff9800;
 }
 
 .cancel-btn {
@@ -410,7 +412,7 @@ body {
 }
 
 .action-btn {
-  background: transparent;
+
   border: none;
   color: var(--capy-text-secondary);
   cursor: pointer;
@@ -1121,7 +1123,7 @@ body {
 
 .photo-viewer-layout {
   display: flex;
-  height: calc(100vh - var(--nav-height));
+  height: 100vh;
   overflow: hidden;
   background: #000;
 }
@@ -1186,6 +1188,12 @@ body {
   margin-top: 0;
   border-top: none;
   border-bottom: 1px solid var(--capy-border);
+}
+
+.photo-sidebar-actions .action-btn svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
 }
 
 .photo-comments-scroll {

@@ -1,0 +1,307 @@
+.play-admin-container {
+  min-height: 100vh;
+  background-color: #000;
+  color: #fff;
+  padding: 40px;
+  font-family: 'Inter', sans-serif;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 20px;
+}
+
+.admin-header h1 {
+  color: #D2691E;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.exit-btn {
+  background: transparent;
+  border: 1px solid #D2691E;
+  color: #D2691E;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.exit-btn:hover {
+  background: #D2691E;
+  color: #fff;
+}
+
+/* Login Screen */
+.admin-login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+}
+
+.admin-login-box {
+  background: #111;
+  padding: 40px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.admin-login-box h2 {
+  color: #D2691E;
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.admin-input {
+  width: 100%;
+  padding: 12px;
+  background: #222;
+  border: 1px solid #444;
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.admin-btn {
+  width: 100%;
+  padding: 12px;
+  background: #D2691E;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.admin-btn:hover {
+  background: #b05515;
+}
+
+.back-link {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Table */
+.games-list-container {
+  background: #111;
+  border-radius: 12px;
+  border: 1px solid #333;
+  overflow-x: auto;
+}
+
+.games-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.games-table th,
+.games-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #222;
+}
+
+.games-table th {
+  color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.admin-thumbnail {
+  width: 60px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.game-title-cell {
+  font-weight: 600;
+  color: white;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.status-badge.user {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.status-badge.developer {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.edit-btn {
+    background: rgba(33, 150, 243, 0.1);
+    color: #2196F3;
+    border: 1px solid rgba(33, 150, 243, 0.2);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.edit-btn:hover {
+    background: rgba(33, 150, 243, 0.2);
+}
+
+.delete-btn {
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.2);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  background: rgba(244, 67, 54, 0.2);
+}
+
+/* Edit Modal */
+.admin-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.admin-modal {
+    background: #1a1a1a;
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+.admin-modal h3 {
+    margin-top: 0;
+    color: white;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 12px;
+}
+
+.admin-form-group {
+    margin-bottom: 20px;
+}
+
+.admin-form-group label {
+    display: block;
+    color: #888;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.admin-form-group input,
+.admin-form-group textarea,
+.admin-form-group select {
+    width: 100%;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    padding: 10px;
+    border-radius: 6px;
+    color: white;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.admin-form-group textarea {
+    resize: vertical;
+}
+
+.admin-form-group input:focus,
+.admin-form-group textarea:focus,
+.admin-form-group select:focus {
+    border-color: #D2691E;
+    outline: none;
+}
+
+.plays-input-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.reset-btn {
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 0 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.reset-btn:hover {
+    background: #444;
+}
+
+.admin-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+}
+
+.cancel-btn {
+    background: transparent;
+    color: #888;
+    border: 1px solid transparent;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.cancel-btn:hover {
+    color: white;
+}
+
+.save-btn {
+    background: #D2691E;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.save-btn:hover {
+    background: #b05515;
+}

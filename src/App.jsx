@@ -12,6 +12,8 @@ import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
 import PhotoViewer from './pages/PhotoViewer';
+import Play from './pages/Play';
+import PlayAdmin from './pages/PlayAdmin';
 import SearchPage from './pages/SearchPage';
 import PostPage from './pages/PostPage';
 import SettingsPage from './pages/SettingsPage';
@@ -124,7 +126,7 @@ const Layout = ({ children }) => {
   }, [location.pathname, location.state]);
 
   // Hide Navbar on Landing Page, Signup Page, and Forgot Password Page
-  const hideNavbar = location.pathname === '/' || location.pathname === '/signup' || location.pathname === '/forgot-password' || location.pathname === '/connections' || location.pathname === '/settings';
+  const hideNavbar = location.pathname === '/' || location.pathname === '/signup' || location.pathname === '/forgot-password' || location.pathname === '/connections' || location.pathname === '/settings' || location.pathname === '/play' || location.pathname === '/play/adminaccess' || location.pathname.startsWith('/photo/');
 
   return (
     <div className="App">
@@ -172,6 +174,8 @@ function ModalSwitch() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/connections" element={<Cappies />} />
         <Route path="/devs" element={<CapyDEVS />} />
+        <Route path="/play" element={<Play />} />
+        <Route path="/play/adminaccess" element={<PlayAdmin />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/post/:id" element={<PostPage />} />
         <Route path="/settings" element={<SettingsPage />} />

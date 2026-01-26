@@ -261,6 +261,19 @@ const CapyHome = () => {
     return () => unsubscribe();
   }, [user, db]);
 
+  // Fetch Saved Posts
+  useEffect(() => {
+    if (!user) {
+      setSavedPosts({});
+      return;
+    }
+    const savedRef = ref(db, `users/${user.uid}/savedPosts`);
+    const unsubscribe = onValue(savedRef, (snapshot) => {
+      setSavedPosts(snapshot.val() || {});
+    });
+    return () => unsubscribe();
+  }, [user, db]);
+
   // Helper: Check if story is tech/cyber related
   const isTechOrCyber = (story) => {
     if (!story || !story.title) return false;
@@ -965,6 +978,8 @@ const CapyHome = () => {
                   navigate('/profile');
                 } else if (item.label === 'Settings') {
                   navigate('/settings');
+                } else if (item.label === 'Play') {
+                  navigate('/play');
                 }
               }}
             >

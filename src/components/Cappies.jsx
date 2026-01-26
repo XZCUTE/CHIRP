@@ -827,6 +827,7 @@ const Cappies = () => {
                 else if (item.label === 'CapyDEVS') navigate('/devs');
                 else if (item.label === 'Profile') navigate('/profile');
                 else if (item.label === 'Settings') navigate('/settings');
+                else if (item.label === 'Play') navigate('/play');
               }}
             >
               <span className="sidebar-icon">{item.icon}</span>
