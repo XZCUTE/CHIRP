@@ -185,7 +185,6 @@ const Play = () => {
         title: uploadTitle,
         description: uploadDescription,
         image: imageUrl,
-        htmlContent: gameContent,
         author: user.displayName || 'Anonymous Developer',
         authorId: user.uid,
         category: uploadCategory,

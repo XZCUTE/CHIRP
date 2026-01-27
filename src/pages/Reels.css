@@ -1,0 +1,348 @@
+.reels-container {
+  /* width: 100%; Removed to allow flex to work properly */
+  flex: 1;
+  height: calc(100vh - 60px); /* Adjust based on your navbar height */
+  background-color: #000;
+  color: #e4e6eb;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  position: relative;
+  /* Hide scrollbar for cleaner look */
+  scrollbar-width: none; /* Firefox */
+}
+
+.reels-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Floating header for Add Reel button */
+.reels-header {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  width: auto;
+  pointer-events: none; /* Let clicks pass through to reel unless hitting button */
+}
+
+.reels-header h1 {
+  display: none; /* Hide title to focus on content */
+}
+
+.add-reel-btn {
+  background-color: rgba(210, 105, 30, 0.8);
+  backdrop-filter: blur(4px);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  pointer-events: auto;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.add-reel-btn:hover {
+  background-color: #D2691E;
+  transform: scale(1.05);
+}
+
+.reels-feed {
+  width: 100%;
+  /* No gap, full height flow */
+  display: block; 
+}
+
+.reel-card {
+  width: 100%;
+  height: calc(100vh - 60px); /* Full viewport height minus navbar */
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  background-color: #000;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border: none;
+  border-radius: 0;
+}
+
+/* Reel content fills the card */
+.reel-content {
+  width: 100%;
+  height: 100%;
+  max-width: 500px; /* Limit width on desktop */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reel-embed {
+  width: 100%;
+  height: 100%;
+  border: none;
+  object-fit: cover;
+}
+
+/* Overlay info on top of video */
+.reel-info-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reel-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto; /* Allow clicking author info */
+}
+
+.author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+}
+
+.author-initial {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background-color: #D2691E;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.author-name {
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.delete-reel-btn {
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #ff4d4d;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: auto;
+  transition: background 0.2s;
+}
+
+.delete-reel-btn:hover {
+  background: rgba(255, 0, 0, 0.2);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background-color: #1e1e1e;
+  padding: 30px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: #e4e6eb;
+  margin-bottom: 8px;
+}
+
+.modal-subtitle {
+  color: #b0b3b8;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.reel-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: #2a2a2a;
+  color: white;
+  font-size: 16px;
+  margin-bottom: 16px;
+  outline: none;
+  box-sizing: border-box; /* Fix padding causing overflow */
+}
+
+.reel-input:focus {
+  border-color: #D2691E;
+}
+
+.error-message {
+  color: #ff4d4d;
+  font-size: 14px;
+  margin-top: -8px;
+  margin-bottom: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e4e6eb;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.submit-btn {
+  background-color: #D2691E;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #b05515;
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading-spinner, .no-reels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #b0b3b8;
+  font-size: 18px;
+}
+
+/* Sidebar Layout & Styles */
+.reels-page-wrapper {
+  display: flex;
+  min-height: calc(100vh - 60px);
+  background-color: #000;
+}
+
+.reels-sidebar {
+  width: 280px;
+  position: sticky;
+  top: 60px; /* Navbar height */
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+  background-color: #000;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.reels-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Sidebar Menu Styles */
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e4e6eb;
+}
+
+.sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-item.active {
+  font-weight: 700;
+  color: #d2691e;
+}
+
+.sidebar-icon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 1000px) {
+  .reels-sidebar {
+    display: none;
+  }
+}

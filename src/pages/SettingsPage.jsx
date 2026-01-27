@@ -70,6 +70,7 @@ const SettingsPage = () => {
                 if (item.label === 'CapyHome') navigate('/home');
                 else if (item.label === 'Connections') navigate('/connections');
                 else if (item.label === 'CapyDEVS') navigate('/devs');
+                else if (item.label === 'Reels') navigate('/reels');
                 else if (item.label === 'Profile') navigate('/profile');
                 else if (item.label === 'Settings') navigate('/settings');
                 else if (item.label === 'Play') navigate('/play');

@@ -978,6 +978,8 @@ const CapyHome = () => {
                   navigate('/profile');
                 } else if (item.label === 'Settings') {
                   navigate('/settings');
+                } else if (item.label === 'Reels') {
+                  navigate('/reels');
                 } else if (item.label === 'Play') {
                   navigate('/play');
                 }

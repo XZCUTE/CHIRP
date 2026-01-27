@@ -17,6 +17,7 @@ import PlayAdmin from './pages/PlayAdmin';
 import SearchPage from './pages/SearchPage';
 import PostPage from './pages/PostPage';
 import SettingsPage from './pages/SettingsPage';
+import Reels from './pages/Reels';
 import GeoBlocker from './components/GeoBlocker';
 import Antigravity from './components/Antigravity';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
@@ -179,6 +180,7 @@ function ModalSwitch() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/post/:id" element={<PostPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/reels" element={<Reels />} />
         <Route path="/photo/:postId/:index" element={<PhotoViewer />} />
         <Route path="*" element={<LandingPage />} />
       </Routes>
