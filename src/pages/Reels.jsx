@@ -11,6 +11,8 @@ const Reels = () => {
   const [activeReelId, setActiveReelId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newReelUrl, setNewReelUrl] = useState('');
+  const [newReelTitle, setNewReelTitle] = useState('');
+  const [newReelDescription, setNewReelDescription] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -256,6 +258,8 @@ const Reels = () => {
       type: parsed.type,
       videoId: parsed.videoId,
       originalUrl: newReelUrl,
+      title: newReelTitle || '',
+      description: newReelDescription || '',
       timestamp: serverTimestamp(),
       authorId: user ? user.uid : 'anonymous',
       authorName: user ? (user.displayName || 'Anonymous') : 'Anonymous',
@@ -282,6 +286,8 @@ const Reels = () => {
       }
 
       setNewReelUrl('');
+      setNewReelTitle('');
+      setNewReelDescription('');
       setIsModalOpen(false);
     } catch (err) {
       setError('Failed to post reel: ' + err.message);
@@ -311,48 +317,52 @@ const Reels = () => {
   const sidebarItems = [
     { 
       label: 'CapyHome', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> 
     },
     { 
       label: 'Connections', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> 
     },
     { 
       label: 'CapyDEVS', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> 
+    },
+    { 
+      label: 'CapyTips', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> 
     },
     { 
       label: 'Reels', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg> 
     },
     { 
       label: 'Activities', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> 
     },
     { 
       label: 'Learn', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg> 
     },
     { 
       label: 'Offers', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> 
     },
     { 
       label: 'Recruit', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> 
     },
     { 
       label: 'Crew', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> 
     },
     { 
       label: 'Play', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 12h4m-2-2v4M15 11h.01M18 13h.01"></path></svg>
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 12h4m-2-2v4M15 11h.01M18 13h.01"></path></svg> 
     },
     { 
       label: 'Settings', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.09a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.09a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-    }
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.09a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.09a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg> 
+    },
   ];
 
   return (
@@ -367,6 +377,7 @@ const Reels = () => {
                 if (item.label === 'CapyHome') navigate('/home');
                 else if (item.label === 'Connections') navigate('/connections');
                 else if (item.label === 'CapyDEVS') navigate('/devs');
+                else if (item.label === 'CapyTips') navigate('/tips');
                 else if (item.label === 'Reels') navigate('/reels');
                 else if (item.label === 'Activities') navigate('/activities');
                 else if (item.label === 'Learn') navigate('/learn');
@@ -384,14 +395,6 @@ const Reels = () => {
         </div>
       </aside>
 
-      <div className="reels-container page-transition" ref={containerRef}>
-      <div className="reels-header">
-        <button className="add-reel-btn" onClick={() => setIsModalOpen(true)}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          Add Reel
-        </button>
-      </div>
-
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -403,8 +406,23 @@ const Reels = () => {
                 type="text" 
                 value={newReelUrl}
                 onChange={(e) => setNewReelUrl(e.target.value)}
+                placeholder="YouTube/TikTok Shorts URL"
                 className="reel-input"
                 autoFocus
+              />
+              <input 
+                type="text" 
+                value={newReelTitle}
+                onChange={(e) => setNewReelTitle(e.target.value)}
+                placeholder="Title (Optional)"
+                className="reel-input"
+              />
+              <textarea 
+                value={newReelDescription}
+                onChange={(e) => setNewReelDescription(e.target.value)}
+                placeholder="Description (Optional)"
+                className="reel-input reel-textarea"
+                rows={3}
               />
               {error && <p className="error-message">{error}</p>}
               
@@ -417,84 +435,98 @@ const Reels = () => {
         </div>
       )}
 
-      <div className="reels-feed">
-        {loading ? (
-          <div className="loading-spinner">Loading Reels...</div>
-        ) : reels.length === 0 ? (
-          <div className="no-reels">
-            <p>No reels yet. Be the first to add one!</p>
-          </div>
-        ) : (
-          <>
-            {reels.map((reel, index) => {
-              const isActive = reel.id === activeReelId;
-              const shouldRender = shouldRenderContent(index);
+      <div className="reels-container">
+        <div className="reels-content">
+          <div className="reels-wrapper-box">
+            <div className="reels-header">
+              <button className="add-reel-btn" onClick={() => setIsModalOpen(true)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Reel
+              </button>
+            </div>
 
-              return (
-                <div 
-                  key={reel.id} 
-                  className="reel-card"
-                  data-reel-id={reel.id}
-                  ref={el => reelRefs.current[reel.id] = el}
-                >
-                  {shouldRender ? (
-                    <div className="reel-content">
-                      <div className="reel-info-overlay">
-                        <div className="reel-author">
-                          {reel.authorAvatar ? (
-                            <img src={reel.authorAvatar} alt={reel.authorName} className="author-avatar" />
-                          ) : (
-                            <div className="author-initial">{reel.authorName?.[0] || 'A'}</div>
-                          )}
-                          <span className="author-name">{reel.authorName}</span>
-                          
-                          {user && user.uid === reel.authorId && (
-                            <button className="delete-reel-btn" onClick={() => handleDelete(reel.id)} title="Delete Reel">
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Render Embeds - Autoplay only if active */}
-                      {reel.type === 'youtube' && (
-                        <iframe 
-                          src={`https://www.youtube.com/embed/${reel.videoId}?autoplay=${isActive ? 1 : 0}&mute=1&controls=1&loop=1&playlist=${reel.videoId}`} 
-                          title="YouTube Short"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                          allowFullScreen
-                          className="reel-embed youtube-embed"
-                        ></iframe>
-                      )}
-
-                    </div>
-                  ) : (
-                    <div className="loading-spinner">Loading...</div>
-                  )}
+            <div className="reels-feed" ref={containerRef}>
+              {loading ? (
+                <div className="loading-spinner">Loading Reels...</div>
+              ) : reels.length === 0 ? (
+                <div className="no-reels">
+                  <p>No reels yet. Be the first to add one!</p>
                 </div>
-              );
-            })}
-            
-            {hasMore && (
-              <div 
-                ref={loaderRef} 
-                className="loading-sentinel"
-                style={{ 
-                  height: '100px', 
-                  width: '100%',
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  alignItems: 'center',
-                  color: '#b0b3b8'
-                }}
-              >
-                {loadingMore && "Loading more..."}
-              </div>
-            )}
-          </>
-        )}
+              ) : (
+                <>
+                  {reels.map((reel, index) => {
+                    const isActive = reel.id === activeReelId;
+                    const shouldRender = shouldRenderContent(index);
+
+                    return (
+                      <div 
+                        key={reel.id} 
+                        className="reel-card"
+                        data-reel-id={reel.id}
+                        ref={el => reelRefs.current[reel.id] = el}
+                      >
+                        {shouldRender ? (
+                          <div className="reel-content">
+                            <div className="reel-info-overlay">
+                              <div className="reel-author">
+                                {reel.authorAvatar ? (
+                                  <img src={reel.authorAvatar} alt={reel.authorName} className="author-avatar" />
+                                ) : (
+                                  <div className="author-initial">{reel.authorName?.[0] || 'A'}</div>
+                                )}
+                                <span className="author-name">{reel.authorName}</span>
+                                
+                                {user && user.uid === reel.authorId && (
+                                  <button className="delete-reel-btn" onClick={() => handleDelete(reel.id)} title="Delete Reel">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                  </button>
+                                )}
+                              </div>
+                              {reel.title && <div className="reel-title">{reel.title}</div>}
+                              {reel.description && <div className="reel-description">{reel.description}</div>}
+                            </div>
+
+                            {/* Render Embeds - Autoplay only if active */}
+                            {reel.type === 'youtube' && (
+                              <iframe 
+                                src={`https://www.youtube.com/embed/${reel.videoId}?autoplay=${isActive ? 1 : 0}&mute=1&controls=1&loop=1&playlist=${reel.videoId}`} 
+                                title="YouTube Short"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowFullScreen
+                                className="reel-embed youtube-embed"
+                              ></iframe>
+                            )}
+
+                          </div>
+                        ) : (
+                          <div className="loading-spinner">Loading...</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  
+                  {hasMore && (
+                    <div 
+                      ref={loaderRef} 
+                      className="loading-sentinel"
+                      style={{ 
+                        height: '100px', 
+                        width: '100%',
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        color: '#b0b3b8'
+                      }}
+                    >
+                      {loadingMore && "Loading more..."}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
     </div>
   );
 };

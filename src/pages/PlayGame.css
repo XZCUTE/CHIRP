@@ -10,6 +10,7 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overscroll-behavior: contain;
   color: #fff;
   animation: fadeIn 0.3s ease;
 }

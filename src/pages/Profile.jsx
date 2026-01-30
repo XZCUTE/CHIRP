@@ -17,6 +17,7 @@ const Profile = () => {
   const [user, setUser] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [allPosts, setAllPosts] = useState([]);
+  const [allTips, setAllTips] = useState([]);
   const [savedPosts, setSavedPosts] = useState({});
   const [activeTab, setActiveTab] = useState('posts');
   const [friendsCount, setFriendsCount] = useState(0);
@@ -140,10 +141,24 @@ const Profile = () => {
           }
         });
 
+        // Fetch Tips for Score Calculation
+        const tipsRef = ref(db, 'tips');
+        onValue(tipsRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            const tipsArray = Object.entries(data)
+              .map(([key, value]) => ({ id: key, ...value }));
+            setAllTips(tipsArray);
+          } else {
+            setAllTips([]);
+          }
+        });
+
       } else {
         setUser(null);
         setProfileData(null);
         setAllPosts([]);
+        setAllTips([]);
         setSavedPosts({});
       }
     });
@@ -386,9 +401,15 @@ const Profile = () => {
 
   const displayAvatarUrl = avatarPreview || (!isAvatarRemoved && (profileData.photoURL || user.photoURL));
 
-  const totalScore = allPosts
+  const postScore = allPosts
     .filter(post => post.authorId === user.uid)
     .reduce((sum, post) => sum + (post.score || 0), 0);
+
+  const tipScore = allTips
+    .filter(tip => tip.authorId === user.uid)
+    .reduce((sum, tip) => sum + (Number(tip.score) || 0), 0);
+
+  const totalScore = postScore + tipScore;
 
   const getDisplayedPosts = () => {
     if (activeTab === 'posts') {

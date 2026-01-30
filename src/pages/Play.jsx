@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { getDatabase, ref, onValue, push, serverTimestamp, runTransaction } from 'firebase/database';
 import { auth } from '../firebase';
@@ -67,6 +68,7 @@ const Play = () => {
     { label: 'CapyHome', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> },
     { label: 'Connections', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> },
     { label: 'CapyDEVS', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> },
+    { label: 'CapyTips', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> },
     { label: 'Reels', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg> },
     { label: 'Activities', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> },
     { label: 'Learn', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg> },
@@ -95,6 +97,18 @@ const Play = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  // Lock body scroll when game is open
+  useEffect(() => {
+    if (selectedGame) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedGame]);
 
   // Handlers
   const handleImageSelect = (e) => {
@@ -384,6 +398,13 @@ const Play = () => {
                 if (item.label === 'CapyHome') navigate('/home');
                 else if (item.label === 'Connections') navigate('/connections');
                 else if (item.label === 'CapyDEVS') navigate('/devs');
+                else if (item.label === 'CapyTips') navigate('/tips');
+                else if (item.label === 'Reels') navigate('/reels');
+                else if (item.label === 'Activities') navigate('/activities');
+                else if (item.label === 'Learn') navigate('/learn');
+                else if (item.label === 'Offers') navigate('/offers');
+                else if (item.label === 'Recruit') navigate('/recruit');
+                else if (item.label === 'Crew') navigate('/crew');
                 else if (item.label === 'Profile') navigate('/profile');
                 else if (item.label === 'Settings') navigate('/settings');
                 else if (item.label === 'Play') setActiveTab('Play');
@@ -462,7 +483,7 @@ const Play = () => {
       </div>
 
       {/* Upload Modal */}
-      {showUploadModal && (
+      {showUploadModal && createPortal(
         <div className="modal-overlay upload-modal-overlay">
           <div className="modal-content upload-modal">
             <h3>Upload Your Game</h3>
@@ -547,7 +568,8 @@ const Play = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Game Room Overlay */}

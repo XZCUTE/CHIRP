@@ -71,25 +71,40 @@ const MiniProfileCard = ({ targetUid, position, onClose, initialName, initialAva
       setLoading(false);
     });
 
-    // Fetch All Posts to calculate user stats
+    // Fetch All Posts and Tips to calculate user stats
     const postsRef = ref(db, 'posts');
+    const tipsRef = ref(db, 'tips');
+    
+    let postsData = {};
+    let tipsData = {};
+
+    const calculateStats = () => {
+      const userPosts = Object.values(postsData).filter(post => post.authorId === targetUid);
+      const postScore = userPosts.reduce((acc, post) => acc + (post.score || 0), 0);
+
+      const userTips = Object.values(tipsData).filter(tip => tip.authorId === targetUid);
+      const tipScore = userTips.reduce((acc, tip) => acc + (Number(tip.score) || 0), 0);
+
+      setStats({
+        posts: userPosts.length,
+        score: postScore + tipScore
+      });
+    };
+
     const unsubscribePosts = onValue(postsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const userPosts = Object.values(data).filter(post => post.authorId === targetUid);
-        const totalScore = userPosts.reduce((acc, post) => acc + (post.score || 0), 0);
-        setStats({
-          posts: userPosts.length,
-          score: totalScore
-        });
-      } else {
-        setStats({ posts: 0, score: 0 });
-      }
+      postsData = snapshot.val() || {};
+      calculateStats();
+    });
+
+    const unsubscribeTips = onValue(tipsRef, (snapshot) => {
+      tipsData = snapshot.val() || {};
+      calculateStats();
     });
 
     return () => {
       unsubscribeUser();
       unsubscribePosts();
+      unsubscribeTips();
     };
   }, [targetUid, currentUser, isMe, db]);
 

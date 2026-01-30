@@ -55,18 +55,14 @@
   transform: scale(1.05);
 }
 
-.reels-feed {
-  width: 100%;
-  /* No gap, full height flow */
-  display: block; 
-}
+
 
 .reel-card {
   width: 100%;
-  height: calc(100vh - 60px); /* Full viewport height minus navbar */
+  height: 100vh;
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  background-color: #000;
+  background-color: transparent;
   position: relative;
   display: flex;
   justify-content: center;
@@ -85,6 +81,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #000; /* Black background for the card/video only */
+  border-radius: 12px; /* Rounded corners for the video card */
+  overflow: hidden; /* Ensure content doesn't spill */
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5); /* Shadow for depth */
 }
 
 .reel-embed {
@@ -284,28 +284,98 @@
 /* Sidebar Layout & Styles */
 .reels-page-wrapper {
   display: flex;
-  min-height: calc(100vh - 60px);
-  background-color: #000;
+  min-height: 100vh;
+  background-color: transparent;
 }
 
 .reels-sidebar {
   width: 280px;
-  position: sticky;
-  top: 60px; /* Navbar height */
-  height: calc(100vh - 60px);
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
   overflow-y: auto;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 20px;
-  background-color: #000;
-  z-index: 10;
-  flex-shrink: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  z-index: 100;
 }
 
 .reels-sidebar::-webkit-scrollbar {
   display: none;
 }
 
-/* Sidebar Menu Styles */
+.reels-container {
+  flex: 1;
+  margin-left: 280px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.reels-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.reels-wrapper-box {
+  display: flex;
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+  position: relative;
+}
+
+.reels-feed {
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+}
+
+.reels-feed::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.reel-card {
+  width: 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  background-color: transparent;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border: none;
+  border-radius: 0;
+}
+
+.reel-content {
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000; /* Black background for the card/video only */
+  border-radius: 12px; /* Rounded corners for the video card */
+  overflow: hidden; /* Ensure content doesn't spill */
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5); /* Shadow for depth */
+}
+
 .sidebar-menu {
   display: flex;
   flex-direction: column;

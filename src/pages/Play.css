@@ -171,16 +171,7 @@
   font-weight: 600;
 }
 
-/* Upload Modal */
-.upload-modal {
-  width: 90%;
-  max-width: 700px;
-  background: var(--capy-card-bg);
-  border-radius: 20px;
-  padding: 32px;
-  border: 1px solid var(--capy-border);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-}
+/* Upload Modal Styles - See bottom of file for .upload-modal definition */
 
 .upload-modal h3 {
   margin-top: 0;
@@ -400,6 +391,19 @@
 
 /* Custom positioning for upload modal */
 .modal-overlay.upload-modal-overlay {
-  align-items: flex-end; /* Align to bottom */
-  padding-bottom: 80px; /* Add some space from bottom */
+  align-items: center;
+  padding-bottom: 0;
+}
+
+/* Upload Modal */
+.upload-modal {
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--capy-card-bg);
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid var(--capy-border);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }

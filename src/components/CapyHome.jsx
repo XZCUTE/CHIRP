@@ -234,6 +234,9 @@ const CapyHome = () => {
   // Edit State
   const [editingPostId, setEditingPostId] = useState(null);
   const [editContent, setEditContent] = useState('');
+  const [editExistingImages, setEditExistingImages] = useState([]);
+  const [editNewImages, setEditNewImages] = useState([]);
+  const [editNewPreviews, setEditNewPreviews] = useState([]);
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
   // Comment State
@@ -755,21 +758,141 @@ const CapyHome = () => {
     }
   };
 
+  const handleEditImageSelect = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    const validFiles = [];
+    const validPreviews = [];
+    let hasError = false;
+
+    files.forEach(file => {
+      if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)/)) {
+        if (!hasError) showModal({ message: "Only .jpg, .png, .gif, .webp formats are allowed!", title: "Invalid File" });
+        hasError = true;
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        if (!hasError) showModal({ message: "File size must be less than 5MB!", title: "File Too Large" });
+        hasError = true;
+        return;
+      }
+      validFiles.push(file);
+      validPreviews.push(URL.createObjectURL(file));
+    });
+
+    if (validFiles.length > 0) {
+      setEditNewImages(prev => [...prev, ...validFiles]);
+      setEditNewPreviews(prev => [...prev, ...validPreviews]);
+    }
+    e.target.value = null;
+  };
+
+  const removeEditNewImage = (index) => {
+    setEditNewImages(prev => prev.filter((_, i) => i !== index));
+    setEditNewPreviews(prev => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const removeEditExistingImage = (index) => {
+    setEditExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleEditPaste = (e) => {
+    if (e.clipboardData && e.clipboardData.items) {
+      const items = e.clipboardData.items;
+      const files = [];
+      let hasImage = false;
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          hasImage = true;
+          const file = items[i].getAsFile();
+          if (file) files.push(file);
+        }
+      }
+
+      if (hasImage) {
+        e.preventDefault();
+        if (files.length > 0) {
+          const validFiles = [];
+          const validPreviews = [];
+          let hasError = false;
+
+          files.forEach(file => {
+            if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)/)) {
+              if (!hasError) showModal({ message: "Only .jpg, .png, .gif, .webp formats are allowed!", title: "Invalid File" });
+              hasError = true;
+              return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+              if (!hasError) showModal({ message: "File size must be less than 5MB!", title: "File Too Large" });
+              hasError = true;
+              return;
+            }
+            validFiles.push(file);
+            validPreviews.push(URL.createObjectURL(file));
+          });
+
+          if (validFiles.length > 0) {
+            setEditNewImages(prev => [...prev, ...validFiles]);
+            setEditNewPreviews(prev => [...prev, ...validPreviews]);
+          }
+        }
+      }
+    }
+  };
+
   const handleEditClick = (post) => {
     setEditingPostId(post.id);
     setEditContent(post.content);
+    
+    let existing = [];
+    if (post.images) {
+      existing = post.images;
+    } else if (post.image) {
+      existing = [{ url: post.image, deleteUrl: post.imageDeleteUrl }];
+    }
+    setEditExistingImages(existing);
+    setEditNewImages([]);
+    setEditNewPreviews([]);
+
     setOpenDropdownId(null);
   };
 
   const handleSaveEdit = async (postId) => {
-    if (!editContent.trim()) return;
+    if (!editContent.trim() && editExistingImages.length === 0 && editNewImages.length === 0) return;
+    
     try {
+      let uploadedNewImages = [];
+      if (editNewImages.length > 0) {
+         const uploadPromises = editNewImages.map(image => uploadToImgBB(image));
+         const results = await Promise.all(uploadPromises);
+         results.forEach(result => {
+           uploadedNewImages.push({
+             url: result.url,
+             deleteUrl: result.deleteUrl
+           });
+         });
+      }
+
+      const finalImages = [...editExistingImages, ...uploadedNewImages];
+
       await update(ref(db, `posts/${postId}`), {
         content: editContent,
-        isEdited: true
+        isEdited: true,
+        images: finalImages.length > 0 ? finalImages : null,
+        image: finalImages.length > 0 ? finalImages[0].url : null,
+        imageDeleteUrl: finalImages.length > 0 ? finalImages[0].deleteUrl : null
       });
+
       setEditingPostId(null);
       setEditContent('');
+      setEditExistingImages([]);
+      setEditNewImages([]);
+      setEditNewPreviews([]);
     } catch (error) {
       console.error("Error updating post:", error);
       showModal({ message: "Failed to update post.", title: "Error" });
@@ -878,6 +1001,10 @@ const CapyHome = () => {
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> 
     },
     { 
+      label: 'CapyTips', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> 
+    },
+    { 
       label: 'Reels', 
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg> 
     },
@@ -974,12 +1101,18 @@ const CapyHome = () => {
                   navigate('/connections');
                 } else if (item.label === 'CapyDEVS') {
                   navigate('/devs');
+                } else if (item.label === 'CapyTips') {
+                  navigate('/tips');
                 } else if (item.label === 'Profile') {
                   navigate('/profile');
                 } else if (item.label === 'Settings') {
                   navigate('/settings');
                 } else if (item.label === 'Reels') {
                   navigate('/reels');
+                } else if (item.label === 'Learn') {
+                  navigate('/learn');
+                } else if (item.label === 'Offers') {
+                  navigate('/offers');
                 } else if (item.label === 'Play') {
                   navigate('/play');
                 }
@@ -1264,8 +1397,65 @@ const CapyHome = () => {
                     <textarea 
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
+                      onPaste={handleEditPaste}
                       className="edit-post-textarea"
                     />
+                    
+                    {/* Edit Images Area */}
+                    <div className="edit-images-area" style={{ marginTop: '10px' }}>
+                      {/* Existing Images */}
+                      {editExistingImages.length > 0 && (
+                          <div className="image-preview-grid" style={{ marginBottom: '10px' }}>
+                              {editExistingImages.map((img, index) => (
+                                  <div key={`existing-${index}`} className="image-preview-item">
+                                      <img src={img.url} alt={`Existing ${index}`} className="image-preview-img" />
+                                      <button 
+                                          className="remove-image-btn" 
+                                          onClick={() => removeEditExistingImage(index)}
+                                      >×</button>
+                                  </div>
+                              ))}
+                          </div>
+                      )}
+
+                      {/* New Images */}
+                      {editNewPreviews.length > 0 && (
+                          <div className="image-preview-grid" style={{ marginBottom: '10px' }}>
+                              {editNewPreviews.map((preview, index) => (
+                                  <div key={`new-${index}`} className="image-preview-item">
+                                      <img src={preview} alt={`New ${index}`} className="image-preview-img" />
+                                      <button 
+                                          className="remove-image-btn" 
+                                          onClick={() => removeEditNewImage(index)}
+                                      >×</button>
+                                  </div>
+                              ))}
+                          </div>
+                      )}
+
+                      {/* Add Image Button */}
+                      <input 
+                          type="file" 
+                          id={`edit-image-upload-${post.id}`} 
+                          accept="image/*" 
+                          multiple
+                          style={{ display: 'none' }} 
+                          onChange={handleEditImageSelect}
+                      />
+                      <button 
+                          className="post-action-btn" 
+                          style={{ width: 'auto', padding: '5px 10px', fontSize: '0.9rem' }}
+                          onClick={() => document.getElementById(`edit-image-upload-${post.id}`).click()}
+                      >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '5px' }}>
+                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                              <polyline points="21 15 16 10 5 21"></polyline>
+                          </svg>
+                          Add Photo
+                      </button>
+                    </div>
+
                     <div className="edit-actions">
                       <button onClick={() => setEditingPostId(null)} className="cancel-btn">Cancel</button>
                       <button onClick={() => handleSaveEdit(post.id)} className="save-btn">Save</button>

@@ -25,6 +25,10 @@ const SettingsPage = () => {
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> 
     },
     { 
+      label: 'CapyTips', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> 
+    },
+    { 
       label: 'Reels', 
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg> 
     },
@@ -70,7 +74,13 @@ const SettingsPage = () => {
                 if (item.label === 'CapyHome') navigate('/home');
                 else if (item.label === 'Connections') navigate('/connections');
                 else if (item.label === 'CapyDEVS') navigate('/devs');
+                else if (item.label === 'CapyTips') navigate('/tips');
                 else if (item.label === 'Reels') navigate('/reels');
+                else if (item.label === 'Activities') navigate('/activities');
+                else if (item.label === 'Learn') navigate('/learn');
+                else if (item.label === 'Offers') navigate('/offers');
+                else if (item.label === 'Recruit') navigate('/recruit');
+                else if (item.label === 'Crew') navigate('/crew');
                 else if (item.label === 'Profile') navigate('/profile');
                 else if (item.label === 'Settings') navigate('/settings');
                 else if (item.label === 'Play') navigate('/play');
