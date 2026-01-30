@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { getDatabase, ref, push, onValue, serverTimestamp, remove, query, orderByKey, limitToLast, endBefore, get } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import './Reels.css';
 
 const BATCH_SIZE = 3;
 
 const Reels = () => {
+  const { reelId } = useParams();
   const [reels, setReels] = useState([]);
   const [activeReelId, setActiveReelId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,12 +21,23 @@ const Reels = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef(null);
+  const allReelsRef = useRef([]); // Store all fetched reels here
+  const currentIndexRef = useRef(0); // Track how many reels are currently shown
   
   const containerRef = useRef(null);
   const reelRefs = useRef({});
   const navigate = useNavigate();
   const auth = getAuth();
   const user = auth.currentUser;
+
+  // Fisher-Yates Shuffle
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
 
   // Fetch Initial Reels
   useEffect(() => {
@@ -35,28 +47,44 @@ const Reels = () => {
       const reelsRef = ref(db, 'reels');
       
       try {
-        // Use orderByKey() which correlates with time for push IDs
-        // This avoids needing a manual index on 'timestamp' in Firebase Rules
-        const q = query(reelsRef, orderByKey(), limitToLast(BATCH_SIZE));
-        const snapshot = await get(q);
+        const snapshot = await get(reelsRef);
         
         if (snapshot.exists()) {
           const data = snapshot.val();
-          const reelsList = Object.entries(data).map(([id, value]) => ({
+          let allReels = Object.entries(data).map(([id, value]) => ({
             id,
             ...value
-          })).sort((a, b) => b.timestamp - a.timestamp);
-          
-          setReels(reelsList);
-          
-          // Set first reel as active initially if not set
-          if (reelsList.length > 0) {
-            setActiveReelId(reelsList[0].id);
+          }));
+
+          // Handle specific reel ID (Deep Link)
+          if (reelId) {
+            const specificIndex = allReels.findIndex(r => r.id === reelId);
+            if (specificIndex !== -1) {
+              const specificReel = allReels.splice(specificIndex, 1)[0];
+              // Shuffle the rest
+              allReels = shuffleArray(allReels);
+              // Put specific reel at the beginning
+              allReels.unshift(specificReel);
+              setActiveReelId(reelId);
+            } else {
+              // Specific reel not found, just shuffle all
+              allReels = shuffleArray(allReels);
+              if (allReels.length > 0) setActiveReelId(allReels[0].id);
+            }
+          } else {
+            // No specific reel, shuffle all
+            allReels = shuffleArray(allReels);
+            if (allReels.length > 0) setActiveReelId(allReels[0].id);
           }
+
+          allReelsRef.current = allReels;
           
-          if (reelsList.length < BATCH_SIZE) {
-            setHasMore(false);
-          }
+          // Load first batch
+          const initialBatch = allReels.slice(0, BATCH_SIZE);
+          setReels(initialBatch);
+          currentIndexRef.current = initialBatch.length;
+          
+          setHasMore(allReels.length > BATCH_SIZE);
         } else {
           setReels([]);
           setHasMore(false);
@@ -70,51 +98,33 @@ const Reels = () => {
     };
 
     fetchInitialReels();
-  }, []);
+  }, [reelId]);
 
   // Load More Reels
-  const loadMoreReels = useCallback(async () => {
-    if (loadingMore || !hasMore || reels.length === 0) return;
+  const loadMoreReels = useCallback(() => {
+    if (loadingMore || !hasMore) return;
     
     setLoadingMore(true);
-    const db = getDatabase();
-    const reelsRef = ref(db, 'reels');
-    const lastReel = reels[reels.length - 1];
-
-    try {
-      // Fetch items older than the last one
-      // orderByChild('timestamp') changed to orderByKey() to avoid index error
-      // endBefore(key) for key ordering
-      const q = query(
-        reelsRef, 
-        orderByKey(), 
-        endBefore(lastReel.id), 
-        limitToLast(BATCH_SIZE)
-      );
+    
+    // Simulate network delay for smooth UX (optional, but good for "loading" feel)
+    setTimeout(() => {
+      const nextIndex = currentIndexRef.current + BATCH_SIZE;
+      const nextBatch = allReelsRef.current.slice(currentIndexRef.current, nextIndex);
       
-      const snapshot = await get(q);
-      
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const newReels = Object.entries(data).map(([id, value]) => ({
-          id,
-          ...value
-        })).sort((a, b) => b.timestamp - a.timestamp);
+      if (nextBatch.length > 0) {
+        setReels(prev => [...prev, ...nextBatch]);
+        currentIndexRef.current = currentIndexRef.current + nextBatch.length;
         
-        setReels(prev => [...prev, ...newReels]);
-        
-        if (newReels.length < BATCH_SIZE) {
+        if (currentIndexRef.current >= allReelsRef.current.length) {
           setHasMore(false);
         }
       } else {
         setHasMore(false);
       }
-    } catch (err) {
-      console.error("Error loading more reels:", err);
-    } finally {
+      
       setLoadingMore(false);
-    }
-  }, [loadingMore, hasMore, reels]);
+    }, 500);
+  }, [loadingMore, hasMore]);
 
   // Observer for Infinite Scroll
   useEffect(() => {
@@ -348,11 +358,11 @@ const Reels = () => {
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> 
     },
     { 
-      label: 'Recruit', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> 
+      label: 'CHIRPY', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 
     },
     { 
-      label: 'Crew', 
+      label: 'Squads', 
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> 
     },
     { 
@@ -382,8 +392,8 @@ const Reels = () => {
                 else if (item.label === 'Activities') navigate('/activities');
                 else if (item.label === 'Learn') navigate('/learn');
                 else if (item.label === 'Offers') navigate('/offers');
-                else if (item.label === 'Recruit') navigate('/recruit');
-                else if (item.label === 'Crew') navigate('/crew');
+                else if (item.label === 'CHIRPY') navigate('/chirpy');
+                else if (item.label === 'Squads') navigate('/squads');
                 else if (item.label === 'Play') navigate('/play');
                 else if (item.label === 'Settings') navigate('/settings');
               }}
@@ -477,10 +487,20 @@ const Reels = () => {
                                 <span className="author-name">{reel.authorName}</span>
                                 
                                 {user && user.uid === reel.authorId && (
-                                  <button className="delete-reel-btn" onClick={() => handleDelete(reel.id)} title="Delete Reel">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                  </button>
-                                )}
+                                <button 
+                                  className="delete-reel-btn" 
+                                  onClick={() => handleDelete(reel.id)} 
+                                  title="Delete Reel"
+                                  aria-label="Delete Reel"
+                                >
+                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                  </svg>
+                                </button>
+                              )}
                               </div>
                               {reel.title && <div className="reel-title">{reel.title}</div>}
                               {reel.description && <div className="reel-description">{reel.description}</div>}

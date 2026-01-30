@@ -1,0 +1,343 @@
+.activities-page-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #000;
+  color: #e4e6eb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Sidebar Styles (Consistent with other pages) */
+.activities-sidebar {
+  width: 250px;
+  position: fixed;
+  left: 0;
+  top: 60px; /* Navbar height */
+  height: calc(100vh - 60px);
+  background-color: #000;
+  border-right: 1px solid #2f3336;
+  padding-top: 20px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #e4e6eb;
+}
+
+.sidebar-item:hover {
+  background-color: rgba(210, 105, 30, 0.1);
+}
+
+.sidebar-item.active {
+  background-color: rgba(210, 105, 30, 0.2);
+  border-right: 3px solid #D2691E;
+  color: #D2691E;
+}
+
+.sidebar-icon {
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-label {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Main Content Area */
+.activities-content {
+  flex: 1;
+  margin-left: 250px; /* Sidebar width */
+  margin-top: 60px; /* Navbar height */
+  padding: 30px;
+  /* Use flex column to center content, but allow full width for children */
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  /* Ensure it takes full width available minus sidebar */
+  width: calc(100% - 250px); 
+  box-sizing: border-box;
+}
+
+.activities-header {
+  margin-bottom: 40px;
+  text-align: center;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.activities-header h1 {
+  font-size: 3rem;
+  color: #D2691E;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.activities-header p {
+  color: #b0b3b8;
+  font-size: 1.1rem;
+}
+
+/* Daily Challenge Card */
+.daily-challenge-section {
+  margin-bottom: 40px;
+  width: 100%;
+  max-width: 1000px; /* Limit width for better centering appearance */
+}
+
+.challenge-card {
+  background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+  border: 1px solid #D2691E;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(210, 105, 30, 0.15);
+  position: relative;
+  overflow: hidden;
+  text-align: center; /* Center text inside card */
+}
+
+.challenge-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: #D2691E;
+}
+
+.challenge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.challenge-badge {
+  background-color: rgba(210, 105, 30, 0.2);
+  color: #D2691E;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.difficulty-badge {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.difficulty-badge.easy { background-color: rgba(0, 255, 0, 0.1); color: #00ff00; }
+.difficulty-badge.medium { background-color: rgba(255, 165, 0, 0.1); color: #ffa500; }
+.difficulty-badge.hard { background-color: rgba(255, 0, 0, 0.1); color: #ff0000; }
+
+.challenge-card h2 {
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.challenge-card p {
+  color: #b0b3b8;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.challenge-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.points {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.start-challenge-btn {
+  background-color: #D2691E;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.start-challenge-btn:hover {
+  background-color: #b05515;
+  transform: translateY(-2px);
+}
+
+/* Tabs */
+.activities-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  justify-content: center; /* Center the tabs */
+  width: 100%;
+}
+
+.activity-tab {
+  background-color: #1e1e1e;
+  border: 1px solid #2f3336;
+  color: #b0b3b8;
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.activity-tab:hover {
+  background-color: #2f3336;
+  color: #fff;
+}
+
+.activity-tab.active {
+  background-color: #D2691E;
+  color: white;
+  border-color: #D2691E;
+}
+
+/* Events Grid */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  justify-content: center; /* Center the grid items if they don't fill the row */
+}
+
+.event-card {
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #2f3336;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  border-color: #D2691E;
+}
+
+.event-image-wrapper {
+  height: 180px;
+  position: relative;
+}
+
+.event-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.event-type-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  backdrop-filter: blur(4px);
+}
+
+.event-details {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: center; /* Center text in event cards */
+}
+
+.event-date {
+  color: #D2691E;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.event-title {
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+  color: #fff;
+  line-height: 1.3;
+}
+
+.event-description {
+  color: #b0b3b8;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+  flex: 1;
+  line-height: 1.5;
+}
+
+.event-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.attendees-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.join-btn {
+  background-color: transparent;
+  border: 1px solid #D2691E;
+  color: #D2691E;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.join-btn:hover {
+  background-color: #D2691E;
+  color: white;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .activities-sidebar {
+    display: none; /* Hide sidebar on mobile or use a drawer */
+  }
+
+  .activities-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+}

@@ -146,22 +146,45 @@
 }
 
 .delete-reel-btn {
-  background: rgba(0, 0, 0, 0.5);
-  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #ff4d4d;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   margin-left: auto;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  padding: 8px; /* Ensures 8px padding around icon */
+  box-sizing: border-box;
 }
 
 .delete-reel-btn:hover {
-  background: rgba(255, 0, 0, 0.2);
+  background: rgba(255, 77, 77, 0.15);
+  color: #ff6666;
+  transform: scale(1.05);
+  border-color: rgba(255, 77, 77, 0.3);
+}
+
+.delete-reel-btn:active {
+  transform: scale(0.95);
+  background: rgba(255, 77, 77, 0.25);
+}
+
+.delete-reel-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.delete-reel-btn svg {
+  width: 20px;
+  height: 20px;
+  display: block; /* Removes any line-height issues */
 }
 
 /* Modal Styles */

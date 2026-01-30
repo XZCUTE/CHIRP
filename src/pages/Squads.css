@@ -1,0 +1,458 @@
+.squads-page-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #000;
+  color: #e4e6eb;
+}
+
+.squads-sidebar {
+  width: 250px;
+  position: fixed;
+  left: 0;
+  top: 60px;
+  height: calc(100vh - 60px);
+  background-color: #000;
+  border-right: 1px solid #2f3336;
+  padding-top: 20px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.squads-content {
+  flex: 1;
+  margin-left: 250px;
+  margin-top: 60px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(100% - 250px);
+  box-sizing: border-box;
+}
+
+.squads-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.squads-header h1 {
+  color: #D2691E;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.squads-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.squad-tab {
+  background: #1e1e1e;
+  border: 1px solid #2f3336;
+  color: #b0b3b8;
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.squad-tab.active {
+  background: #D2691E;
+  color: white;
+  border-color: #D2691E;
+}
+
+.squads-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.squad-card, .create-squad-card {
+  background: #1e1e1e;
+  border: 1px solid #2f3336;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.squad-card:hover, .create-squad-card:hover {
+  transform: translateY(-4px);
+  border-color: #D2691E;
+}
+
+.create-squad-card {
+  justify-content: center;
+  cursor: pointer;
+  border-style: dashed;
+}
+
+.plus-icon {
+  font-size: 40px;
+  color: #D2691E;
+}
+
+.squad-tag {
+  background: rgba(210, 105, 30, 0.2);
+  color: #D2691E;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  margin: 10px 0;
+}
+
+.private-badge {
+  background: #333;
+  color: #888;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  margin-bottom: 10px;
+}
+
+.join-btn, .apply-btn, .enter-btn {
+  background: transparent;
+  border: 1px solid #D2691E;
+  color: #D2691E;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: auto;
+}
+
+.join-btn:hover, .apply-btn:hover, .enter-btn:hover {
+  background: #D2691E;
+  color: white;
+}
+
+.my-squad {
+  border-color: #D2691E;
+}
+
+/* Management Actions */
+.manage-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 10px;
+}
+
+.edit-btn, .delete-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.edit-btn {
+    color: #4da6ff;
+}
+
+.delete-btn {
+    color: #ff4d4d;
+}
+
+.edit-btn:hover {
+    background: rgba(77, 166, 255, 0.1);
+}
+
+.delete-btn:hover {
+    background: rgba(255, 77, 77, 0.1);
+}
+
+.recruit-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.edit-btn-mini, .delete-btn-mini {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.edit-btn-mini {
+    color: #4da6ff;
+}
+
+.delete-btn-mini {
+    color: #ff4d4d;
+}
+
+/* Recruitment Styles */
+.recruit-container {
+    width: 100%;
+    max-width: 800px;
+}
+
+.recruit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.create-post-btn {
+    background: #D2691E;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.recruit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.recruit-card {
+    background: #1e1e1e;
+    border: 1px solid #2f3336;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: left;
+    align-items: flex-start;
+}
+
+.recruit-card-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.recruit-status {
+    background: #2f3336;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.recruit-desc {
+    color: #b0b3b8;
+    margin-bottom: 15px;
+}
+
+.recruit-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    background: #333;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+/* Squad Details & Chat */
+.squad-details-view {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px);
+}
+
+.squad-details-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #2f3336;
+    padding-bottom: 15px;
+}
+
+.back-btn {
+    background: transparent;
+    border: none;
+    color: #D2691E;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.squad-tag-badge {
+    font-size: 0.8rem;
+    background: #333;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+.squad-chat-container {
+    flex: 1;
+    background: #1e1e1e;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #2f3336;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.chat-message {
+    max-width: 70%;
+    align-self: flex-start;
+}
+
+.chat-message.my-message {
+    align-self: flex-end;
+}
+
+.message-content {
+    background: #2f3336;
+    padding: 10px 15px;
+    border-radius: 12px;
+    border-bottom-left-radius: 2px;
+}
+
+.my-message .message-content {
+    background: #D2691E;
+    color: white;
+    border-radius: 12px;
+    border-bottom-right-radius: 2px;
+    border-bottom-left-radius: 12px;
+}
+
+.message-meta {
+    font-size: 0.7rem;
+    color: #888;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.chat-input-area {
+    padding: 15px;
+    background: #1a1a1a;
+    border-top: 1px solid #2f3336;
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input-area input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #333;
+    background: #2a2a2a;
+    color: white;
+}
+
+.chat-input-area button {
+    background: #D2691E;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.chat-input-area button:hover {
+    background: #b35919;
+    transform: scale(1.05);
+}
+
+.chat-input-area button svg {
+    margin-left: -2px; /* Visual alignment for paper plane */
+    margin-top: 2px;
+}
+
+.empty-chat {
+    text-align: center;
+    color: #888;
+    margin-top: 50px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #1e1e1e;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid #2f3336;
+}
+
+.modal-content input, .modal-content select, .modal-content textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  background: #2a2a2a;
+  border: 1px solid #333;
+  color: white;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+
+.modal-actions button:last-child {
+  background: #D2691E;
+  color: white;
+}

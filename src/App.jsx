@@ -19,8 +19,11 @@ import PostPage from './pages/PostPage';
 import SettingsPage from './pages/SettingsPage';
 import Reels from './pages/Reels';
 import Offers from './pages/Offers';
+import Activities from './pages/Activities';
+import Squads from './pages/Squads';
 import Learn from './pages/Learn';
 import CapyTips from './pages/CapyTips';
+import Chirpy from './pages/Chirpy';
 import GeoBlocker from './components/GeoBlocker';
 import Antigravity from './components/Antigravity';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
@@ -130,7 +133,7 @@ const Layout = ({ children }) => {
   }, [location.pathname, location.state]);
 
   // Hide Navbar on Landing Page, Signup Page, and Forgot Password Page
-  const hideNavbar = location.pathname === '/' || location.pathname === '/signup' || location.pathname === '/forgot-password' || location.pathname === '/connections' || location.pathname === '/settings' || location.pathname === '/play' || location.pathname === '/play/adminaccess' || location.pathname === '/learn' || location.pathname === '/reels' || location.pathname === '/offers' || location.pathname === '/tips' || location.pathname.startsWith('/photo/');
+  const hideNavbar = location.pathname === '/' || location.pathname === '/signup' || location.pathname === '/forgot-password' || location.pathname === '/connections' || location.pathname === '/settings' || location.pathname === '/play' || location.pathname === '/play/adminaccess' || location.pathname === '/learn' || location.pathname === '/reels' || location.pathname === '/offers' || location.pathname === '/tips' || location.pathname === '/chirpy' || location.pathname.startsWith('/photo/');
 
   return (
     <div className="App">
@@ -185,7 +188,11 @@ function ModalSwitch() {
         <Route path="/post/:id" element={<PostPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/reels" element={<Reels />} />
-        <Route path="/offers" element={<Offers />} />
+          <Route path="/reels/:reelId" element={<Reels />} />
+          <Route path="/activities" element={<Activities />} />
+          <Route path="/squads" element={<Squads />} />
+          <Route path="/chirpy" element={<Chirpy />} />
+          <Route path="/offers" element={<Offers />} />
         <Route path="/learn" element={<Learn />} />
         <Route path="/photo/:postId/:index" element={<PhotoViewer />} />
         <Route path="*" element={<LandingPage />} />

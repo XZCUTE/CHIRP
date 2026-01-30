@@ -1,0 +1,58 @@
+.user-search-dropdown {
+  background-color: var(--capy-card-bg);
+  border: 1px solid var(--capy-border);
+  border-radius: 8px;
+  width: 250px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.dropdown-user-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid var(--capy-border-light);
+}
+
+.dropdown-user-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-user-item:hover {
+  background-color: var(--capy-hover);
+}
+
+.dropdown-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
+}
+
+.dropdown-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--capy-text);
+}
+
+.dropdown-username {
+  font-size: 11px;
+  color: var(--capy-text-secondary);
+}
+
+.dropdown-loading {
+  padding: 12px;
+  text-align: center;
+  color: var(--capy-text-secondary);
+  font-size: 12px;
+}

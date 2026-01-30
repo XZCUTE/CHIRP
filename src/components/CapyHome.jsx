@@ -1,11 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { getDatabase, ref, onValue, push, update, remove, serverTimestamp, runTransaction } from 'firebase/database';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { getDatabase, ref, onValue, push, update, remove, serverTimestamp, runTransaction, get } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 import './CapyHome.css';
 import CapyModal from './CapyModal';
 import InitialsAvatar from './InitialsAvatar';
 import MiniProfileCard from './MiniProfileCard';
+import UserSearchDropdown from './UserSearchDropdown'; // New Import
+
+// Helper to render mentions
+const renderContentWithMentions = (text) => {
+  if (!text) return null;
+  // Regex to match @username (including underscores which replace spaces)
+  // Supports @DisplayName_With_Spaces format
+  const parts = text.split(/(@[\w._]+)/g);
+  
+  return parts.map((part, index) => {
+    if (part.startsWith('@')) {
+      const handle = part.slice(1);
+      // Revert underscores to spaces for display search
+      return (
+        <Link key={index} to={`/search?q=${handle.replace(/_/g, ' ')}&type=users`} onClick={(e) => e.stopPropagation()} style={{ color: 'var(--capy-accent)', textDecoration: 'none', fontWeight: 'bold' }}>
+          {part.replace(/_/g, ' ')} 
+        </Link>
+      );
+    }
+    return part;
+  });
+};
 
 import { uploadToImgBB, deleteFromImgBB } from '../utils/imgbb';
 
@@ -247,19 +269,120 @@ const CapyHome = () => {
   const [editCommentText, setEditCommentText] = useState('');
   const [openCommentDropdownId, setOpenCommentDropdownId] = useState(null);
 
+  // Mentions State
+  const [mentionQuery, setMentionQuery] = useState(null);
+  const [mentionPosition, setMentionPosition] = useState(null);
+  const [mentionTarget, setMentionTarget] = useState(null); // 'post', 'comment'
+  const postInputRef = useRef(null);
+  const commentInputRef = useRef(null);
+
+  const handleInputMentions = (e, target) => {
+    const { value, selectionStart } = e.target;
+    
+    // Check word before cursor
+    const textBeforeCursor = value.slice(0, selectionStart);
+    const words = textBeforeCursor.split(/\s/);
+    const currentWord = words[words.length - 1];
+
+    if (currentWord.startsWith('@') && currentWord.length > 1) {
+      const query = currentWord.slice(1);
+      setMentionQuery(query);
+      setMentionTarget(target);
+      
+      // Calculate position relative to input container
+      // This is simplified; ideally we calculate based on caret coordinates
+      // For now, we'll position it below the input box
+      if (target === 'post' && postInputRef.current) {
+         // Position logic can be handled in CSS relative to parent, 
+         // but passing null position lets the component handle default or fixed positioning
+         // We'll pass a fixed offset or rely on absolute positioning in parent
+         setMentionPosition({ top: '100%', left: 0 }); 
+      } else {
+         setMentionPosition(null); // Default handling
+      }
+    } else {
+      setMentionQuery(null);
+      setMentionTarget(null);
+    }
+    
+    // Update actual state
+    if (target === 'post') setNewPostContent(value);
+    else if (target === 'comment') setCommentText(value);
+  };
+
+  const handleSelectMention = (user) => {
+    // Use display name with spaces replaced by underscores for the handle
+    const displayName = user.name || user.displayName || 'Unknown';
+    const handle = `@${displayName.replace(/\s+/g, '_')}`;
+    
+    if (mentionTarget === 'post') {
+       const textBeforeCursor = newPostContent.slice(0, newPostContent.lastIndexOf('@' + mentionQuery));
+       // We need to be careful with replace, this is rough but works for simple cases at end of typing
+       // Better: replace only the last occurrence of @query before cursor? 
+       // For now, simple replace of the active query word
+       const regex = new RegExp(`@${mentionQuery}$`);
+       const newValue = newPostContent.replace(regex, handle + ' ');
+       
+       // Fallback if regex fails (e.g. cursor in middle)
+       if (newValue === newPostContent) {
+           // Try simple split/join on the last word
+           const words = newPostContent.split(' ');
+           words[words.length - 1] = handle;
+           setNewPostContent(words.join(' ') + ' ');
+       } else {
+           setNewPostContent(newValue);
+       }
+    } else if (mentionTarget === 'comment') {
+       const regex = new RegExp(`@${mentionQuery}$`);
+       const newValue = commentText.replace(regex, handle + ' ');
+        if (newValue === commentText) {
+           const words = commentText.split(' ');
+           words[words.length - 1] = handle;
+           setCommentText(words.join(' ') + ' ');
+       } else {
+           setCommentText(newValue);
+       }
+    }
+    
+    setMentionQuery(null);
+    setMentionTarget(null);
+  };
+
   const auth = getAuth();
   const db = getDatabase();
   const user = auth.currentUser;
 
-  // Fetch Friends for Privacy
+  // Fetch Friends for Privacy and Validation
   useEffect(() => {
     if (!user) {
       setMyFriends({});
       return;
     }
     const friendsRef = ref(db, `users/${user.uid}/friends`);
-    const unsubscribe = onValue(friendsRef, (snapshot) => {
-      setMyFriends(snapshot.val() || {});
+    const unsubscribe = onValue(friendsRef, async (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // Fetch full profiles for friends to support name validation
+        const friendsMap = {};
+        const promises = Object.keys(data).map(async (friendUid) => {
+            try {
+                const userSnap = await get(ref(db, `users/${friendUid}`));
+                if (userSnap.exists()) {
+                    friendsMap[friendUid] = userSnap.val();
+                } else {
+                    friendsMap[friendUid] = { displayName: 'Unknown' };
+                }
+            } catch (e) {
+                console.error("Error fetching friend profile:", e);
+                friendsMap[friendUid] = { displayName: 'Unknown' };
+            }
+        });
+        
+        await Promise.all(promises);
+        setMyFriends(friendsMap);
+      } else {
+        setMyFriends({});
+      }
     });
     return () => unsubscribe();
   }, [user, db]);
@@ -588,6 +711,25 @@ const CapyHome = () => {
     if (!commentText.trim()) return;
     if (!user) return showModal({ message: "Please login to comment!", title: "Login Required" });
 
+    // Validate Mentions (Cappies Only)
+    const mentions = commentText.match(/@[\w._]+/g);
+    if (mentions) {
+        for (const mention of mentions) {
+            const handle = mention.slice(1);
+            const potentialName = handle.replace(/_/g, ' ').toLowerCase();
+            const isFriend = Object.values(myFriends).some(friend => {
+                const friendName = (friend.displayName || friend.name || '').toLowerCase();
+                const friendHandle = friendName.replace(/\s+/g, '_');
+                return friendName === potentialName || friendHandle === handle.toLowerCase();
+            });
+
+            if (!isFriend) {
+                showModal({ message: `You can only mention your Cappies. "@${handle.replace(/_/g, ' ')}" is not in your connections.`, title: "Mention Error" });
+                return;
+            }
+        }
+    }
+
     try {
       // Add comment to subcollection
       await push(ref(db, `posts/${postId}/comments_list`), {
@@ -682,6 +824,34 @@ const CapyHome = () => {
 
   const handlePostSubmit = async () => {
     if (!newPostContent.trim() && selectedImages.length === 0) return;
+
+    // Validate Mentions (Cappies Only)
+    const mentions = newPostContent.match(/@[\w._]+/g);
+    if (mentions) {
+        for (const mention of mentions) {
+            const handle = mention.slice(1); // Remove @
+            // NOTE: Ideally we check against user IDs, but we only have handles here.
+            // Since we constrained the dropdown to myFriends, valid selection is safe.
+            // But manual typing needs verification.
+            // For rigorous verification, we would need to map handles back to IDs or
+            // check if a friend exists with that display name (normalized).
+            
+            // Normalize handle back to display name format (underscores to spaces)
+            const potentialName = handle.replace(/_/g, ' ').toLowerCase();
+            
+            // Check if any friend matches this name (case insensitive)
+            const isFriend = Object.values(myFriends).some(friend => {
+                const friendName = (friend.displayName || friend.name || '').toLowerCase();
+                const friendHandle = friendName.replace(/\s+/g, '_');
+                return friendName === potentialName || friendHandle === handle.toLowerCase();
+            });
+
+            if (!isFriend) {
+                showModal({ message: `You can only mention your Cappies. "@${handle.replace(/_/g, ' ')}" is not in your connections.`, title: "Mention Error" });
+                return;
+            }
+        }
+    }
     
     setIsUploading(true);
     try {
@@ -1021,11 +1191,11 @@ const CapyHome = () => {
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> 
     },
     { 
-      label: 'Recruit', 
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> 
+      label: 'CHIRPY', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 
     },
     { 
-      label: 'Crew', 
+      label: 'Squads', 
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> 
     },
     { 
@@ -1113,6 +1283,10 @@ const CapyHome = () => {
                   navigate('/learn');
                 } else if (item.label === 'Offers') {
                   navigate('/offers');
+                } else if (item.label === 'CHIRPY') {
+                  navigate('/chirpy');
+                } else if (item.label === 'Squads') {
+                  navigate('/squads');
                 } else if (item.label === 'Play') {
                   navigate('/play');
                 }
@@ -1145,15 +1319,29 @@ const CapyHome = () => {
                 fontSize="16px"
               />
             )}
-            <input 
-              type="text"  
-              placeholder="What's on your mind, Capy? Use #hashtags to trend!" 
-              className="create-post-input"
-              value={newPostContent}
-              onChange={(e) => setNewPostContent(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handlePostSubmit()}
-              onPaste={handlePaste}
-            />
+            <div style={{ position: 'relative' }}>
+              <input 
+                type="text"  
+                placeholder="What's on your mind, Capy? Use #hashtags to trend!" 
+                className="create-post-input"
+                value={newPostContent}
+                onChange={(e) => {
+                    setNewPostContent(e.target.value);
+                    handleInputMentions(e, 'post');
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handlePostSubmit()}
+                onPaste={handlePaste}
+                ref={postInputRef}
+              />
+              {mentionTarget === 'post' && (
+                <UserSearchDropdown 
+                   query={mentionQuery}
+                   onSelect={handleSelectMention}
+                   position={mentionPosition}
+                   allowedUsers={myFriends}
+                />
+              )}
+            </div>
           </div>
 
           {/* Image Preview Area */}
@@ -1463,7 +1651,7 @@ const CapyHome = () => {
                   </div>
                 ) : (
                   <>
-                    {post.content && <p>{post.content}</p>}
+                    {post.content && <p>{renderContentWithMentions(post.content)}</p>}
 
                     {/* Repost Content */}
                     {post.repostData && (
@@ -1490,7 +1678,7 @@ const CapyHome = () => {
                           </div>
                         </div>
                         <div className="repost-body">
-                           <p className="post-content-mini">{post.repostData.content}</p>
+                           <p className="post-content-mini">{renderContentWithMentions(post.repostData.content)}</p>
                            {post.repostData.linkPreview && (
                               <div className="post-link-preview">
                                 {post.repostData.linkPreview.type === 'video' ? (
@@ -1685,7 +1873,7 @@ const CapyHome = () => {
                                   )}
                                 </div>
                                 <p className="comment-text">
-                                  {comment.text}
+                                  {renderContentWithMentions(comment.text)}
                                   {comment.isEdited && <span className="edited-label"> – edited</span>}
                                 </p>
                               </>
@@ -1698,17 +1886,31 @@ const CapyHome = () => {
                     )}
                   </div>
                   <div className="comment-input-area">
-                    <input 
-                      type="text" 
-                      placeholder="Write a comment..." 
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSubmitComment(post.id)}
-                      className="comment-input"
-                    />
-                    <button onClick={() => handleSubmitComment(post.id)} className="comment-submit-btn">
-                      ➤
-                    </button>
+                    <div className="comment-input-wrapper">
+                        <input 
+                          type="text" 
+                          placeholder="Write a comment..." 
+                          value={commentText}
+                          onChange={(e) => {
+                              setCommentText(e.target.value);
+                              handleInputMentions(e, 'comment');
+                          }}
+                          onKeyDown={(e) => e.key === 'Enter' && handleSubmitComment(post.id)}
+                          className="comment-input"
+                          ref={commentInputRef}
+                        />
+                        <button onClick={() => handleSubmitComment(post.id)} className="comment-submit-btn">
+                          ➤
+                        </button>
+                        {mentionTarget === 'comment' && (
+                            <UserSearchDropdown 
+                               query={mentionQuery}
+                               onSelect={handleSelectMention}
+                               position={{ bottom: '100%', left: 0 }}
+                               allowedUsers={myFriends}
+                            />
+                        )}
+                    </div>
                   </div>
                 </div>
               )}
