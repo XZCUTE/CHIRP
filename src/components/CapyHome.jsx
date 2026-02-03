@@ -1279,6 +1279,8 @@ const CapyHome = () => {
                   navigate('/settings');
                 } else if (item.label === 'Reels') {
                   navigate('/reels');
+                } else if (item.label === 'Activities') {
+                  navigate('/activities');
                 } else if (item.label === 'Learn') {
                   navigate('/learn');
                 } else if (item.label === 'Offers') {

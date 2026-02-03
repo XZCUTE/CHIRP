@@ -26,6 +26,7 @@ import CapyTips from './pages/CapyTips';
 import Chirpy from './pages/Chirpy';
 import GeoBlocker from './components/GeoBlocker';
 import Antigravity from './components/Antigravity';
+import SecurityGuard from './components/SecurityGuard';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
 import './App.css';
 
@@ -155,6 +156,7 @@ function App() {
     <GeoBlocker>
       <SettingsProvider>
         <Router>
+          <SecurityGuard />
           <AuthGuard>
             <Layout>
               <ModalSwitch />

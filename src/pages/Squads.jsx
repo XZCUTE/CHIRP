@@ -37,37 +37,6 @@ const Squads = () => {
   const [recruitTags, setRecruitTags] = useState('');
   const [recruitDesc, setRecruitDesc] = useState('');
 
-  // Sidebar items
-  const sidebarItems = [
-    { label: 'CapyHome', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> },
-    { label: 'Connections', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> },
-    { label: 'CapyDEVS', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> },
-    { label: 'CapyTips', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> },
-    { label: 'Reels', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg> },
-    { label: 'Activities', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> },
-    { label: 'Learn', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10v6"></path><path d="M20 16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8c0-1.1.9-2 2-2h12a2 2 0 0 1 2 2v8Z"></path><path d="M10 12h4"></path></svg> },
-    { label: 'Offers', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> },
-    { label: 'CHIRPY', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> },
-    { label: 'Squads', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> },
-    { label: 'Play', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 12h4"></path><path d="M8 10v4"></path><circle cx="17" cy="12" r="1.5"></circle></svg> },
-    { label: 'Settings', icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> }
-  ];
-
-  const handleSidebarClick = (item) => {
-    if (item.label === 'CapyHome') navigate('/home');
-    else if (item.label === 'Connections') navigate('/connections');
-    else if (item.label === 'CapyDEVS') navigate('/devs');
-    else if (item.label === 'CapyTips') navigate('/tips');
-    else if (item.label === 'Reels') navigate('/reels');
-    else if (item.label === 'Activities') navigate('/activities');
-    else if (item.label === 'Learn') navigate('/learn');
-    else if (item.label === 'Offers') navigate('/offers');
-    else if (item.label === 'CHIRPY') navigate('/chirpy');
-    else if (item.label === 'Squads') navigate('/squads');
-    else if (item.label === 'Play') navigate('/play');
-    else if (item.label === 'Settings') navigate('/settings');
-  };
-
   useEffect(() => {
     // Migration Logic via Service
     SquadService.migrateCrewsToSquads();
@@ -245,15 +214,80 @@ const Squads = () => {
       }
   };
 
+  const menuItems = [
+    { 
+      label: 'CapyHome', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> 
+    },
+    { 
+      label: 'Connections', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> 
+    },
+    { 
+      label: 'CapyDEVS', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> 
+    },
+    { 
+      label: 'CapyTips', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> 
+    },
+    { 
+      label: 'Reels', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg> 
+    },
+    { 
+      label: 'Activities', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> 
+    },
+    { 
+      label: 'Learn', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg> 
+    },
+    { 
+      label: 'Offers', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> 
+    },
+    { 
+      label: 'CHIRPY', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 
+    },
+    { 
+      label: 'Squads', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> 
+    },
+    { 
+      label: 'Play', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 12h4m-2-2v4M15 11h.01M18 13h.01"></path></svg> 
+    },
+    { 
+      label: 'Settings', 
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.09a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.09a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg> 
+    },
+  ];
+
   return (
     <div className="squads-page-wrapper">
       <aside className="squads-sidebar">
         <div className="sidebar-menu">
-          {sidebarItems.map((item, index) => (
+          {menuItems.map((item) => (
             <div 
-              key={index} 
+              key={item.label}
               className={`sidebar-item ${item.label === 'Squads' ? 'active' : ''}`}
-              onClick={() => handleSidebarClick(item)}
+              onClick={() => {
+                if (item.label === 'CapyHome') navigate('/home');
+                else if (item.label === 'Connections') navigate('/connections');
+                else if (item.label === 'CapyDEVS') navigate('/devs');
+                else if (item.label === 'CapyTips') navigate('/tips');
+                else if (item.label === 'Reels') navigate('/reels');
+                else if (item.label === 'Activities') navigate('/activities');
+                else if (item.label === 'Learn') navigate('/learn');
+                else if (item.label === 'Offers') navigate('/offers');
+                else if (item.label === 'CHIRPY') navigate('/chirpy');
+                else if (item.label === 'Squads') navigate('/squads');
+                else if (item.label === 'Profile') navigate('/profile');
+                else if (item.label === 'Settings') navigate('/settings');
+                else if (item.label === 'Play') navigate('/play');
+              }}
             >
               <span className="sidebar-icon">{item.icon}</span>
               <span className="sidebar-label">{item.label}</span>
@@ -261,12 +295,11 @@ const Squads = () => {
           ))}
         </div>
       </aside>
-
-      <main className="squads-content">
-        {selectedSquad ? (
-            // Squad Details View (Chat & Info)
-            <div className="squad-details-view">
-                <div className="squad-details-header">
+      <div className="squads-content">
+      {selectedSquad ? (
+          // Squad Details View (Chat & Info)
+          <div className="squad-details-view">
+              <div className="squad-details-header">
                     <button className="back-btn" onClick={() => setSelectedSquad(null)}>← Back</button>
                     <h2>{selectedSquad.name} <span className="squad-tag-badge">{selectedSquad.tag}</span></h2>
                 </div>
@@ -452,33 +485,36 @@ const Squads = () => {
         {showRecruitModal && (
             <div className="modal-overlay">
                 <div className="modal-content">
-                    <h2>{editingRecruitPost ? 'Edit Post' : 'Post Recruitment'}</h2>
-                    <input 
-                        type="text" 
-                        placeholder="Title (e.g. Need React Dev for CTF)" 
-                        value={recruitTitle} 
-                        onChange={(e) => setRecruitTitle(e.target.value)} 
-                    />
-                    <input 
-                        type="text" 
-                        placeholder="Tags (comma separated)" 
-                        value={recruitTags} 
-                        onChange={(e) => setRecruitTags(e.target.value)} 
-                    />
-                    <textarea 
-                        placeholder="Description..." 
-                        value={recruitDesc} 
-                        onChange={(e) => setRecruitDesc(e.target.value)} 
-                        rows={4}
-                    />
-                    <div className="modal-actions">
-                        <button onClick={() => setShowRecruitModal(false)}>Cancel</button>
-                        <button onClick={handleCreateRecruitPost}>Post</button>
-                    </div>
+                    <h2>{editingRecruitPost ? 'Edit Post' : 'Create Recruitment Post'}</h2>
+                    <form onSubmit={handleCreateRecruitPost}>
+                        <input 
+                            type="text" 
+                            placeholder="Title (e.g. Looking for Frontend Dev)" 
+                            value={recruitTitle}
+                            onChange={(e) => setRecruitTitle(e.target.value)}
+                            required
+                        />
+                        <input 
+                            type="text" 
+                            placeholder="Tags (e.g. React, CTF, Hackathon)" 
+                            value={recruitTags}
+                            onChange={(e) => setRecruitTags(e.target.value)}
+                        />
+                        <textarea 
+                            placeholder="Description..." 
+                            value={recruitDesc}
+                            onChange={(e) => setRecruitDesc(e.target.value)}
+                            rows="4"
+                        />
+                        <div className="modal-actions">
+                            <button type="button" className="cancel-btn" onClick={() => setShowRecruitModal(false)}>Cancel</button>
+                            <button type="submit" className="create-btn">{editingRecruitPost ? 'Save' : 'Post'}</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         )}
-      </main>
+    </div>
     </div>
   );
 };
