@@ -27,44 +27,28 @@ const SecurityGuard = () => {
 
     // 3. DevTools Detection & Redirect
     const detectDevTools = () => {
-      const threshold = 160;
-      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-      const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+      // Disabled for debugging/development stability
+      // const threshold = 160;
+      // const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+      // const heightThreshold = window.outerHeight - window.innerHeight > threshold;
 
-      if (widthThreshold || heightThreshold) {
-        // Detected DevTools via window resize
-        try {
-            window.location.href = "about:blank";
-        } catch(e) {
-            // ignore
-        }
-      }
+      // if (widthThreshold || heightThreshold) {
+      //   try {
+      //       window.location.href = "about:blank";
+      //   } catch(e) {
+      //       // ignore
+      //   }
+      // }
     };
 
     // 4. Anti-Debugging (Debugger Statement Loop)
     const antiDebug = () => {
-      // This will pause execution if DevTools is open and breakpoints are active
-      // or simply annoy the user if they try to step through code.
-      // Wrapped in setInterval to constantly check.
-      setInterval(() => {
-        // Use a function constructor to obfuscate the debugger statement slightly
-        try {
-            (function(){return false;})['constructor']('debugger;').call();
-        } catch(e) {
-            // ignore
-        }
-      }, 1000);
+      // Disabled for debugging
     };
 
     // 5. Console clearing to hide logs
     const clearConsole = () => {
-      setInterval(() => {
-        try {
-            console.clear();
-        } catch(e) {
-            // ignore
-        }
-      }, 2000);
+      // Disabled for debugging
     };
 
     // Attach Listeners with capture: true to intercept events early
